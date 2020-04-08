@@ -9,6 +9,11 @@ export default class Sky {
     private cloudsGrowing: boolean;
     private planes: Array<Plane>;
 
+    /**
+     * Sky constructor
+     *
+     * @param canvas
+     */
     constructor(canvas: HTMLCanvasElement) {
 
         this.ctx = canvas.getContext("2d");
@@ -33,6 +38,11 @@ export default class Sky {
         this.planes.push(plane)
     }
 
+    /**
+     * Animation loop. This is where
+     * everything gets drawn
+     *
+     */
     public animate() {
 
         this.clearSky();
@@ -46,6 +56,9 @@ export default class Sky {
         requestAnimationFrame(this.animate.bind(this));
     }
 
+    /**
+     * Clear canvas
+     */
     public clearSky() {
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);

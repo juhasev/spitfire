@@ -5,6 +5,7 @@ export default class Plane {
     public static planeTypes: Array<PlaneTypeInterface> = [
         {name: "mustang", image: '/plane.png'},
         {name: "spitfire", image: '/spitfire.png'},
+        {name: "junker", image: '/junker.png'},
     ];
 
     public static directions: Array<Object> = [
@@ -40,6 +41,11 @@ export default class Plane {
     private ctx: CanvasRenderingContext2D | null;
     private canvas: HTMLCanvasElement | null;
 
+    /**
+     * Plane constructor
+     *
+     * @param type
+     */
     constructor(type: string) {
 
         const specs = Plane.planeTypes.find((planeType: PlaneTypeInterface) => {
@@ -75,6 +81,11 @@ export default class Plane {
         this.updateDirection();
     }
 
+    /**
+     * Set canvas where the plane will be drawn to
+     *
+     * @param canvas
+     */
     public setCanvas(canvas: HTMLCanvasElement)
     {
         this.worldHeight = canvas.height;
@@ -91,6 +102,11 @@ export default class Plane {
         };
     }
 
+    /**
+     * Toggle place sounds on/off
+     *
+     * @param sounds
+     */
     public toggleSounds(sounds: boolean) {
         if (sounds) {
             this.audio.play();
@@ -99,6 +115,9 @@ export default class Plane {
         }
     }
 
+    /**
+     * Steer plane to right
+     */
     public steerRight()
     {
         if (this.directionIndex === 7) {
@@ -110,6 +129,9 @@ export default class Plane {
         this.updateDirection();
     }
 
+    /**
+     * Steer plane to left
+     */
     public steerLeft()
     {
         if (this.directionIndex === 0) {
@@ -121,6 +143,9 @@ export default class Plane {
         this.updateDirection();
     }
 
+    /**
+     * Draw the place
+     */
     public draw()
     {
         if (this.ctx !== null && this.canvas !==null) {
@@ -168,6 +193,10 @@ export default class Plane {
         this.calculateVolume();
     }
 
+    /**
+     * Calculate volume for th plane
+     *
+     */
     protected  calculateVolume() {
 
         if (this.audio) {
@@ -191,6 +220,10 @@ export default class Plane {
         }
     }
 
+    /**
+     * Update direction
+     *
+     */
     protected updateDirection() {
         this.dx = Plane.directions[this.directionIndex].dx * this.speed;
         this.dy = Plane.directions[this.directionIndex].dy * this.speed;

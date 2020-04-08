@@ -41,8 +41,8 @@
         mounted() {
 
             this.sky = new Sky(this.$refs.sky);
-            this.planeOne = new Plane('mustang');
-            this.planeTwo = new Plane('spitfire');
+            this.planeOne = new Plane('spitfire');
+            this.planeTwo = new Plane('mustang');
             this.sky.addPlane(this.planeOne);
             this.sky.addPlane(this.planeTwo);
             this.sky.animate();
