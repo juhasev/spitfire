@@ -3,8 +3,8 @@ import Plane from "@/ts/Plane";
 
 export default class Sky {
 
-    private canvas: HTMLCanvasElement;
-    private ctx: CanvasRenderingContext2D | null;
+    private readonly canvas: HTMLCanvasElement;
+    private readonly ctx: CanvasRenderingContext2D | null;
     private clouds: Array<CloudInterface>;
     private cloudsGrowing: boolean;
     private planes: Array<Plane>;
@@ -60,8 +60,8 @@ export default class Sky {
      * Clear canvas
      */
     public clearSky() {
-        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx!.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx!.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     /**

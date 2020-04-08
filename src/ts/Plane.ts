@@ -1,4 +1,5 @@
 import PlaneTypeInterface from "@/ts/Interfaces/PlaneTypeInterface";
+import DirectionInterface from "@/ts/Interfaces/DirectionInterface";
 
 export default class Plane {
 
@@ -8,7 +9,7 @@ export default class Plane {
         {name: "junker", image: '/junker.png'},
     ];
 
-    public static directions: Array<Object> = [
+    public static directions: Array<DirectionInterface> = [
         {name: "west", dx: 1.5, dy: 0, rotation: 45},
         {name: "northwest", dx: 1, dy: 1, rotation: 45},
         {name: "north", dx: 0, dy: 1.5, rotation: 0},
@@ -53,7 +54,7 @@ export default class Plane {
         });
 
         this.image = new Image(); // Using optional size for image
-        this.image.src = specs.image;
+        this.image.src = specs!.image;
 
         this.speed = 5;
 
@@ -162,7 +163,7 @@ export default class Plane {
         }
 
         // Going right
-        if (this.dx > 0 && this.x > this.canvas.width + this.width / 2) {
+        if (this.dx > 0 && this.x > this.canvas!.width + this.width / 2) {
             this.x = -this.width / 2;
             if (this.audio) {
                 this.audio.currentTime = 0;
@@ -171,19 +172,19 @@ export default class Plane {
 
         // Going left
         if (this.dx < 0 && this.x < -this.width / 2) {
-            this.x = this.canvas.width + this.width / 2;
+            this.x = this.canvas!.width + this.width / 2;
             if (this.audio) this.audio.currentTime = 0;
         }
 
         // Going down
-        if (this.dy > 0 && this.y > this.canvas.height + this.height / 2) {
+        if (this.dy > 0 && this.y > this.canvas!.height + this.height / 2) {
             this.y = -this.height / 2;
             if (this.audio) this.audio.currentTime = 0;
         }
 
         // Going up
         if (this.dy < 0 && this.y < -this.height / 2) {
-            this.y = this.canvas.height + this.height / 2;
+            this.y = this.canvas!.height + this.height / 2;
             if (this.audio) this.audio.currentTime = 0;
         }
 
@@ -203,12 +204,12 @@ export default class Plane {
 
             let volume = 0;
 
-            if (this.x < this.canvas.width / 2) {
-                volume = this.x / this.canvas.width / 2;
+            if (this.x < this.canvas!.width / 2) {
+                volume = this.x / this.canvas!.width / 2;
             }
 
-            if (this.x > this.canvas.width / 2) {
-                volume = (this.canvas.width - this.x) / this.canvas.width / 2;
+            if (this.x > this.canvas!.width / 2) {
+                volume = (this.canvas!.width - this.x) / this.canvas!.width / 2;
             }
 
             volume += 0.2;
