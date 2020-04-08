@@ -2,8 +2,8 @@
     <div>
         <keypress :key-code="37" event="keydown" @pressed="planeOneLeft"/>
         <keypress :key-code="39" event="keydown" @pressed="planeOneRight"/>
-        <keypress :key-code="36" event="keydown" @pressed="downPressed"/>
-        <keypress :key-code="38" event="keydown" @pressed="upPressed"/>
+        <keypress :key-code="65" event="keydown" @pressed="planeTwoLeft"/>
+        <keypress :key-code="68" event="keydown" @pressed="planeTwoRight"/>
 
         <div class="debug">
             <v-switch v-model="sounds" dense class="ml-3" @change="soundsToggled" label="Sounds"></v-switch>
@@ -54,20 +54,20 @@
                 this.planeOne.toggleSounds(this.sounds);
             },
 
-            downPressed() {
-                if (this.speed > 1) this.speed -= 1;
-            },
-
-            upPressed() {
-                if (this.speed < 10) this.speed += 1;
-            },
-
             planeOneRight() {
                 this.planeOne.steerRight();
             },
 
             planeOneLeft() {
                this.planeOne.steerLeft();
+            },
+
+            planeTwoRight() {
+                this.planeTwo.steerRight();
+            },
+
+            planeTwoLeft() {
+                this.planeTwo.steerLeft();
             }
         }
     };
