@@ -2,7 +2,7 @@ export default interface PlaneSettingsInterface {
     speed: number;
     health: number,
     directionIndex: number,
-    rotationDegrees: number,
+    directionDegrees: number,
     width: number,
     height: number,
     scale: number,

@@ -119,7 +119,7 @@
                 this.planeOne = new Plane('spitfire', {
                     speed: 5,
                     health: 100,
-                    rotationDegrees: 0,
+                    directionDegrees: 0,
                     width: 100,
                     height: 100,
                     scale: 0.25,
@@ -130,7 +130,7 @@
                 this.planeTwo = new Plane('mustang', {
                     speed: 5,
                     health: 100,
-                    rotationDegrees: 180,
+                    directionDegrees: 180,
                     width: 100,
                     height: 100,
                     scale: 0.25,

@@ -28,7 +28,8 @@ export default class Sky {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         this.gameOver = false;
-        this.gameOverHandler = () => {};
+        this.gameOverHandler = () => {
+        };
         this.designClouds();
 
         console.log("SKY INITIALIZED");
@@ -87,15 +88,14 @@ export default class Sky {
      *
      * @param name
      */
-    protected getEnemyBullets(name: string)
-    {
+    protected getEnemyBullets(name: string) {
         let bullets: Array<Bullet> = [];
 
         this.planes.forEach((planeOther: Plane) => {
 
             // Filter out friendly fire
             if (planeOther.name !== name) {
-                bullets = [...bullets,...planeOther.getBullets()];
+                bullets = [...bullets, ...planeOther.getBullets()];
             }
         });
 
@@ -112,8 +112,7 @@ export default class Sky {
      * @param plane
      * @param bullet
      */
-    protected detectCollision(plane: Plane, bullet: Bullet)
-    {
+    protected detectCollision(plane: Plane, bullet: Bullet) {
         const distance = new DistanceCalculator(plane.getX(), plane.getY(), bullet.getX(), bullet.getY()).getDistance();
 
         if (distance >= 40) return;

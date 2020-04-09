@@ -6,7 +6,7 @@ export default class Bullet {
 
     private x: number;
     private y: number;
-    private rotation: number;
+    private directionDegrees: number;
     private ctx: CanvasRenderingContext2D | null;
     private canvas: HTMLCanvasElement | null;
     private hitTarget: boolean;
@@ -17,17 +17,20 @@ export default class Bullet {
      * @param canvas
      * @param x
      * @param y
-     * @param rotation
+     * @param directionDegrees
      */
-    constructor(canvas: HTMLCanvasElement, x: number, y: number, rotation: number) {
+    constructor(canvas: HTMLCanvasElement, x: number, y: number, directionDegrees: number) {
         this.x = x;
         this.y = y;
-        this.rotation = rotation;
+        this.directionDegrees = directionDegrees;
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
         this.hitTarget = false;
     }
 
+    /**
+     * Render bullet
+     */
     public render()
     {
         this.move();
@@ -43,18 +46,27 @@ export default class Bullet {
         }
     }
 
+    /**
+     * Collision
+     */
     public hit()
     {
         this.hitTarget = true;
     }
 
+    /**
+     * Move bullet
+     */
     protected move()
     {
-        let pos = new PositionCalculator(this.x, this.y, Bullet.BULLET_SPEED, this.rotation);
+        let pos = new PositionCalculator(this.x, this.y, Bullet.BULLET_SPEED, this.directionDegrees);
         this.x = pos.getNewX();
         this.y = pos.getNewY();
     }
 
+    /**
+     * Is bullet still flying
+     */
     public isFlying()
     {
         if (this.x > this.canvas!.width) return false;
@@ -66,13 +78,27 @@ export default class Bullet {
         return true;
     }
 
+    /**
+     * Get X coordinate
+     */
     public getX()
     {
         return this.x;
     }
 
+    /**
+     * Get Y Coordinate
+     */
     public getY()
     {
         return this.y;
+    }
+
+    /**
+     * Get rotation angle
+     */
+    public getDirection()
+    {
+        return this.directionDegrees;
     }
 }

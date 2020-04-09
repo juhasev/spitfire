@@ -40,7 +40,7 @@ export default class Plane {
     private bullets: Array<Bullet>;
     private canFire: boolean;
 
-    private rotationDegrees: number;
+    private directionDegrees: number;
 
     private ctx: CanvasRenderingContext2D | null;
     private canvas: HTMLCanvasElement | null;
@@ -71,7 +71,7 @@ export default class Plane {
         this.height = settings.height;
         this.scale = settings.scale;
 
-        this.rotationDegrees = settings.rotationDegrees;
+        this.directionDegrees = settings.directionDegrees;
         this.audio = new Audio(specs!.audio);
         this.crashAudio = new Audio('./plane_crash.wav');
         this.hitAudio = new Audio('./bullet_hit.wav');
@@ -136,7 +136,7 @@ export default class Plane {
             this.gunAudio.play();
 
             if (this.canvas) {
-                this.bullets.push(new Bullet(this.canvas, this.x, this.y, this.rotationDegrees));
+                this.bullets.push(new Bullet(this.canvas, this.x, this.y, this.directionDegrees));
             }
         }
     }
@@ -148,11 +148,11 @@ export default class Plane {
 
         if (this.fallingOutOfSky) return;
 
-        if (this.rotationDegrees === 360) {
-            this.rotationDegrees = 0;
+        if (this.directionDegrees === 360) {
+            this.directionDegrees = 0;
         }
 
-        this.rotationDegrees += 3;
+        this.directionDegrees += 3;
     }
 
     /**
@@ -162,10 +162,10 @@ export default class Plane {
 
         if (this.fallingOutOfSky) return;
 
-        if (this.rotationDegrees === 0) {
-            this.rotationDegrees = 360;
+        if (this.directionDegrees === 0) {
+            this.directionDegrees = 360;
         }
-        this.rotationDegrees -= 3;
+        this.directionDegrees -= 3;
     }
 
     public addDamage(damage: number) {
@@ -233,14 +233,14 @@ export default class Plane {
      */
     protected fallOutOfSky() {
 
-        if (this.rotationDegrees !== 90) {
-            if (this.rotationDegrees < 90) {
-                this.rotationDegrees += 1;
+        if (this.directionDegrees !== 90) {
+            if (this.directionDegrees < 90) {
+                this.directionDegrees += 1;
                 this.speed = this.speed + 0.1;
             }
 
-            if (this.rotationDegrees > 90) {
-                this.rotationDegrees -= 1;
+            if (this.directionDegrees > 90) {
+                this.directionDegrees -= 1;
                 this.speed = this.speed + 0.1;
             }
         }
@@ -265,11 +265,18 @@ export default class Plane {
     }
 
     /**
+     * Get rotation angle
+     */
+    public getDirection()
+    {
+        return this.directionDegrees;
+    }
+    /**
      * Move the plane
      */
     protected move() {
 
-        let pos = new PositionCalculator(this.x, this.y, this.speed, this.rotationDegrees);
+        let pos = new PositionCalculator(this.x, this.y, this.speed, this.directionDegrees);
 
         this.x = pos.getNewX();
         this.y = pos.getNewY();
@@ -353,6 +360,6 @@ export default class Plane {
      * Get plane image rotation
      */
     protected getImageRotation() {
-        return ((this.rotationDegrees + Plane.IMAGE_ROTATION_DEGREES) * Math.PI) / 180;
+        return ((this.directionDegrees + Plane.IMAGE_ROTATION_DEGREES) * Math.PI) / 180;
     }
 }
