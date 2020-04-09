@@ -29,6 +29,8 @@ export default class Plane {
     private audio: HTMLAudioElement;
     private crashAudio: HTMLAudioElement;
     private hitAudio: HTMLAudioElement;
+    private gunAudio: HTMLAudioElement;
+
     private image: HTMLImageElement;
 
     private width: number;
@@ -36,6 +38,7 @@ export default class Plane {
     private scale: number;
 
     private bullets: Array<Bullet>;
+    private canFire: boolean;
 
     private rotationDegrees: number;
 
@@ -72,7 +75,9 @@ export default class Plane {
         this.audio = new Audio(specs!.audio);
         this.crashAudio = new Audio('./plane_crash.wav');
         this.hitAudio = new Audio('./bullet_hit.wav');
-        this.hitAudio.volume = 0.5;
+        this.hitAudio.volume = 0.3;
+        this.gunAudio = new Audio('./gun_fire.wav');
+        this.gunAudio.volume = 0.3;
 
         this.ctx = null;
         this.canvas = null;
@@ -82,6 +87,8 @@ export default class Plane {
 
         this.fallingOutOfSky = false;
         this.crashed = false;
+
+        this.canFire = true;
     }
 
     /**
@@ -117,8 +124,20 @@ export default class Plane {
      */
     public fire() {
 
-        if (this.canvas) {
-            this.bullets.push(new Bullet(this.canvas, this.x, this.y, this.rotationDegrees));
+        if (this.canFire) {
+
+            this.canFire = false;
+
+            setTimeout(() => {
+                this.canFire = true;
+            }, 500);
+
+            this.gunAudio.currentTime = 0;
+            this.gunAudio.play();
+
+            if (this.canvas) {
+                this.bullets.push(new Bullet(this.canvas, this.x, this.y, this.rotationDegrees));
+            }
         }
     }
 
@@ -192,7 +211,7 @@ export default class Plane {
             this.ctx.closePath();
         }
 
-        this.bullets.forEach((bullet) =>  {
+        this.bullets.forEach((bullet) => {
             bullet.render();
         });
 
@@ -250,8 +269,7 @@ export default class Plane {
      * Detect boundary collisions
      * TODO: Refactor in its own class
      */
-    protected detectBoundaries()
-    {
+    protected detectBoundaries() {
         if (this.fallingOutOfSky) {
             if (this.audio.playbackRate < 2) {
                 this.audio.playbackRate += 0.1;
@@ -288,8 +306,7 @@ export default class Plane {
     /**
      * Restart audio when plane appears again
      */
-    protected restartAudio()
-    {
+    protected restartAudio() {
         if (this.audio) this.audio.currentTime = 0;
     }
 

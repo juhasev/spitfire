@@ -8,20 +8,22 @@
         <keypress :key-code="68" event="keydown" @pressed="planeTwo.right()"/>
         <keypress :key-code="87" event="keydown" @pressed="planeTwo.fire()"/>
 
-        <div class="debug">
+        <keypress :key-code="32" event="keydown" @pressed="startGame"/>
+
+        <div class="controlBar">
             <v-container fluid class="pa-0">
                 <v-row dense>
                     <v-col>
 
                     </v-col>
                     <v-col cols="3">
-                        <health-bar v-if="planeOneHealth" :value="planeOneHealth"></health-bar>
+                        <health-bar v-if="planeOneHealth && planeOneHealth>=0" :value="planeOneHealth"></health-bar>
                     </v-col>
                     <v-col cols="4" class="text-center">
                         <v-btn class="mt-1" small @click="settingsClicked" color="primary">SETTINGS</v-btn>
                     </v-col>
                     <v-col cols="3">
-                        <health-bar v-if="planeTwoHealth" :value="planeTwoHealth"></health-bar>
+                        <health-bar v-if="planeTwoHealth && planeTwoHealth>=0" :value="planeTwoHealth"></health-bar>
                     </v-col>
                     <v-col>
 
@@ -31,7 +33,7 @@
         </div>
 
         <!-- SETTING MODEL -->
-        <v-dialog v-model="settingsModel" width="500">
+        <v-dialog v-model="settingsDialogModel" width="500">
 
             <v-card class="mx-auto">
                 <v-toolbar dark color="primary">
@@ -42,7 +44,7 @@
 
                     <v-spacer></v-spacer>
 
-                    <v-btn icon @click="settingsModel=false">
+                    <v-btn icon @click="settingsDialogModel=false">
                         <v-icon>mdi-close</v-icon>
                     </v-btn>
 
@@ -64,8 +66,19 @@
             </v-card>
         </v-dialog>
 
+        <!-- WELCOME DIALOG -->
+        <v-dialog v-model="welcomeDialogModel" width="600">
+
+            <v-card>
+                <v-card-text class="pt-6 display-4 text-center">
+                    SPITFIRE
+                    <div class="caption">Press SPACE to play</div>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+
         <!-- 2D Canvas -->
-        <canvas class="sky" ref="sky"></canvas>
+        <canvas v-show="!welcomeDialogModel" class="sky" ref="sky"></canvas>
     </div>
 </template>
 
@@ -94,7 +107,8 @@
                 planeOne: null,
                 planeTwo: null,
                 clouds: [],
-                settingsModel: false,
+                welcomeDialogModel: true,
+                settingsDialogModel: false,
                 gameOverDialogModel: false,
             };
         },
@@ -111,7 +125,7 @@
         },
 
         mounted() {
-            this.createGame();
+
         },
 
         methods: {
@@ -165,6 +179,13 @@
                     this.gameOverDialogModel = false;
                     this.createGame();
                 }, 3000);
+            },
+
+            startGame() {
+                if (this.welcomeDialogModel === true) {
+                    this.welcomeDialogModel = false;
+                    this.createGame();
+                }
             }
         }
     };
@@ -172,7 +193,8 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-    .debug {
+
+    .controlBar {
         position: fixed;
         top: 0;
         width: 100%;
