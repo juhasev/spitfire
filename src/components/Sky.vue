@@ -67,11 +67,11 @@
         </v-dialog>
 
         <!-- WELCOME DIALOG -->
-        <v-dialog v-model="welcomeDialogModel" width="600">
+        <v-dialog v-model="welcomeDialogModel" persistent width="600">
 
             <v-card>
+                <v-img src="logo.png"></v-img>
                 <v-card-text class="pt-6 display-4 text-center">
-                    SPITFIRE
                     <div class="caption">Press SPACE to play</div>
                 </v-card-text>
             </v-card>
