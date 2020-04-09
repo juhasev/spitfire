@@ -57,9 +57,9 @@
         <v-dialog v-model="gameOverDialogModel" width="600">
 
             <v-card>
-               <v-card-text class="pt-6 display-4">
+               <v-card-text class="pt-6 display-4 text-center">
                    GAME OVER
-                   <div class="caption">Reload to restart</div>
+                   <div class="caption">Restarting....</div>
                </v-card-text>
             </v-card>
         </v-dialog>
@@ -111,41 +111,45 @@
         },
 
         mounted() {
-
-            this.sky = new Sky(this.$refs.sky);
-            this.sky.gameOverHandler = this.gameOver;
-
-            this.planeOne = new Plane('spitfire', {
-                speed: 5,
-                health: 100,
-                rotationDegrees: 0,
-                width: 100,
-                height: 100,
-                scale: 0.25,
-                x: 0,
-                y: this.$refs.sky.height / 2 + 50
-            });
-
-            this.planeTwo = new Plane('mustang', {
-                speed: 5,
-                health: 100,
-                rotationDegrees: 180,
-                width: 100,
-                height: 100,
-                scale: 0.25,
-                x: this.$refs.sky.width,
-                y: this.$refs.sky.height / 3 + 50
-            });
-
-            this.planeOne.toggleSounds(this.sounds);
-            this.planeTwo.toggleSounds(this.sounds);
-
-            this.sky.addPlane(this.planeOne);
-            this.sky.addPlane(this.planeTwo);
-            this.sky.animate();
+            this.createGame();
         },
 
         methods: {
+
+            createGame() {
+
+                this.sky = new Sky(this.$refs.sky);
+                this.sky.gameOverHandler = this.gameOver;
+
+                this.planeOne = new Plane('spitfire', {
+                    speed: 5,
+                    health: 100,
+                    rotationDegrees: 0,
+                    width: 100,
+                    height: 100,
+                    scale: 0.25,
+                    x: 0,
+                    y: this.$refs.sky.height / 2 + 50
+                });
+
+                this.planeTwo = new Plane('mustang', {
+                    speed: 5,
+                    health: 100,
+                    rotationDegrees: 180,
+                    width: 100,
+                    height: 100,
+                    scale: 0.25,
+                    x: this.$refs.sky.width,
+                    y: this.$refs.sky.height / 3 + 50
+                });
+
+                this.planeOne.toggleSounds(this.sounds);
+                this.planeTwo.toggleSounds(this.sounds);
+
+                this.sky.addPlane(this.planeOne);
+                this.sky.addPlane(this.planeTwo);
+                this.sky.animate();
+            },
 
             settingsClicked() {
                 this.settingsModel = true;
@@ -157,7 +161,10 @@
 
             gameOver() {
                 this.gameOverDialogModel = true;
-                console.log("PLANE CRASH");
+                setTimeout(() => {
+                    this.gameOverDialogModel = false;
+                    this.createGame();
+                }, 3000);
             }
         }
     };

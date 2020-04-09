@@ -36,7 +36,7 @@ export default class Bullet {
 
             this.ctx!.setTransform(1, 0, 0, 1, 0, 0);
             this.ctx.beginPath();
-            this.ctx.arc(this.x, this.y, 5, 0, 2 * Math.PI, false);
+            this.ctx.arc(this.x, this.y, 3, 0, 2 * Math.PI, false);
             this.ctx.fillStyle = 'black';
             this.ctx.fill();
             this.ctx.closePath();

@@ -28,6 +28,7 @@ export default class Plane {
     private y: number;
     private audio: HTMLAudioElement;
     private crashAudio: HTMLAudioElement;
+    private hitAudio: HTMLAudioElement;
     private image: HTMLImageElement;
 
     private width: number;
@@ -70,6 +71,8 @@ export default class Plane {
         this.rotationDegrees = settings.rotationDegrees;
         this.audio = new Audio(specs!.audio);
         this.crashAudio = new Audio('./plane_crash.wav');
+        this.hitAudio = new Audio('./bullet_hit.wav');
+        this.hitAudio.volume = 0.5;
 
         this.ctx = null;
         this.canvas = null;
@@ -130,7 +133,7 @@ export default class Plane {
             this.rotationDegrees = 0;
         }
 
-        this.rotationDegrees += 45;
+        this.rotationDegrees += 3;
     }
 
     /**
@@ -143,10 +146,13 @@ export default class Plane {
         if (this.rotationDegrees === 0) {
             this.rotationDegrees = 360;
         }
-        this.rotationDegrees -= 45;
+        this.rotationDegrees -= 3;
     }
 
     public addDamage(damage: number) {
+
+        this.hitAudio.currentTime = 0;
+        this.hitAudio.play();
 
         if (damage > this.health) {
             this.health = 0;
