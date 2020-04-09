@@ -78,10 +78,19 @@
                 planeOne: null,
                 planeTwo: null,
                 clouds: [],
-                planeOneHealth: 100,
-                planeTwoHealth: 100,
                 settingsModel: false,
             };
+        },
+
+        computed: {
+            planeOneHealth() {
+                if (this.planeOne) return this.planeOne.health;
+                return null;
+            },
+            planeTwoHealth() {
+                if (this.planeTwo) return this.planeTwo.health;
+                return null;
+            }
         },
 
         mounted() {
@@ -90,6 +99,7 @@
 
             this.planeOne = new Plane('spitfire', {
                 speed: 5,
+                health: 19,
                 rotationDegrees: 90,
                 directionIndex: 0,
                 width: 100,
@@ -101,6 +111,7 @@
 
             this.planeTwo = new Plane('mustang', {
                 speed: 5,
+                health: 100,
                 rotationDegrees: -90,
                 directionIndex: 4,
                 width: 100,

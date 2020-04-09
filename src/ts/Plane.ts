@@ -21,6 +21,8 @@ export default class Plane {
         {name: "southwest", dx: 1, dy: -1, rotation: 135}
     ];
 
+    public health: number;
+
     private speed: number;
     private x: number;
     private y: number;
@@ -79,6 +81,8 @@ export default class Plane {
 
         this.ctx = null;
         this.canvas = null;
+
+        this.health = settings.health;
 
         this.updateDirection();
     }
