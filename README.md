@@ -29,5 +29,5 @@ npm run serve
 
 Next click on the link below to start the game in the browser
 
-[http://localhost:8080(http://localhost:8080/)
+[http://localhost:8080](http://localhost:8080/)
 
