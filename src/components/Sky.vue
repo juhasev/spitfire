@@ -15,13 +15,13 @@
 
                     </v-col>
                     <v-col cols="3">
-                        <health-bar :value="planeOneHealth"></health-bar>
+                        <health-bar v-if="planeOneHealth" :value="planeOneHealth"></health-bar>
                     </v-col>
                     <v-col cols="4" class="text-center">
                         <v-btn class="mt-1" small @click="settingsClicked" color="primary">SETTINGS</v-btn>
                     </v-col>
                     <v-col cols="3">
-                        <health-bar :value="planeTwoHealth"></health-bar>
+                        <health-bar v-if="planeTwoHealth" :value="planeTwoHealth"></health-bar>
                     </v-col>
                     <v-col>
 

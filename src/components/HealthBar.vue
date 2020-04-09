@@ -23,7 +23,7 @@
         props: {
             value: {
                 required: true,
-                type: Number
+                type: Number,
             }
         },
 
