@@ -1,9 +1,12 @@
 <template>
     <div>
-        <keypress :key-code="37" event="keydown" @pressed="planeOneLeft"/>
-        <keypress :key-code="39" event="keydown" @pressed="planeOneRight"/>
-        <keypress :key-code="65" event="keydown" @pressed="planeTwoLeft"/>
-        <keypress :key-code="68" event="keydown" @pressed="planeTwoRight"/>
+        <keypress :key-code="37" event="keydown" @pressed="planeOne.left()"/>
+        <keypress :key-code="39" event="keydown" @pressed="planeOne.right()"/>
+        <keypress :key-code="38" event="keydown" @pressed="planeOne.fire()"/>
+
+        <keypress :key-code="65" event="keydown" @pressed="planeTwo.left()"/>
+        <keypress :key-code="68" event="keydown" @pressed="planeTwo.right()"/>
+        <keypress :key-code="119" event="keydown" @pressed="planeTwo.fire()"/>
 
         <div class="debug">
             <v-container fluid class="pa-0">
@@ -100,8 +103,7 @@
             this.planeOne = new Plane('spitfire', {
                 speed: 5,
                 health: 19,
-                rotationDegrees: 90,
-                directionIndex: 0,
+                rotationDegrees: 0,
                 width: 100,
                 height: 100,
                 scale: 0.25,
@@ -112,8 +114,7 @@
             this.planeTwo = new Plane('mustang', {
                 speed: 5,
                 health: 100,
-                rotationDegrees: -90,
-                directionIndex: 4,
+                rotationDegrees: 180,
                 width: 100,
                 height: 100,
                 scale: 0.25,
@@ -135,22 +136,6 @@
             soundsToggled() {
                 this.planeOne.toggleSounds(this.sounds);
             },
-
-            planeOneRight() {
-                this.planeOne.steerRight();
-            },
-
-            planeOneLeft() {
-                this.planeOne.steerLeft();
-            },
-
-            planeTwoRight() {
-                this.planeTwo.steerRight();
-            },
-
-            planeTwoLeft() {
-                this.planeTwo.steerLeft();
-            }
         }
     };
 </script>

@@ -1,8 +1,13 @@
 import PlaneTypeInterface from "@/ts/Interfaces/PlaneTypeInterface";
-import DirectionInterface from "@/ts/Interfaces/DirectionInterface";
 import PlaneSettingsInterface from "@/ts/Interfaces/PlaneSettingsInterface";
+import PositionCalculator from "@/ts/PositionCalculator";
 
 export default class Plane {
+
+    /**
+     * Rotate image degrees to set it to rotation 0 in the sky
+     */
+    static IMAGE_ROTATION_DEGREES: number = 90;
 
     public static planeTypes: Array<PlaneTypeInterface> = [
         {name: "mustang", image: '/plane.png', audio: "spitfire.mp3"},
@@ -10,36 +15,18 @@ export default class Plane {
         {name: "junker", image: '/junker.png', audio: "spitfire.mp3"},
     ];
 
-    public static directions: Array<DirectionInterface> = [
-        {name: "west", dx: 1.5, dy: 0, rotation: 45},
-        {name: "northwest", dx: 1, dy: 1, rotation: 45},
-        {name: "north", dx: 0, dy: 1.5, rotation: 0},
-        {name: "northeast", dx: -1, dy: 1, rotation: -45},
-        {name: "east", dx: -1.5, dy: 0, rotation: -90},
-        {name: "southeast", dx: -1, dy: -1, rotation: -135},
-        {name: "south", dx: -0, dy: -1.5, rotation: -180},
-        {name: "southwest", dx: 1, dy: -1, rotation: 135}
-    ];
-
     public health: number;
 
     private speed: number;
     private x: number;
     private y: number;
-    private dx: number;
-    private dy: number;
     private audio: HTMLAudioElement;
     private image: HTMLImageElement;
-
-    private worldWidth: number;
-    private worldHeight: number;
 
     private width: number;
     private height: number;
     private scale: number;
 
-    private directionIndex: number;
-    private rotationRadian: number;
     private rotationDegrees: number;
 
     private ctx: CanvasRenderingContext2D | null;
@@ -61,30 +48,20 @@ export default class Plane {
 
         this.speed = settings.speed;
 
-        this.worldHeight = 0;
-        this.worldWidth = 0;
-
         this.x = settings.x;
         this.y = settings.y;
-        this.dx = 0
-        this.dy = 0;
 
         this.width = settings.width;
         this.height = settings.height;
         this.scale = settings.scale;
 
-        this.directionIndex = settings.directionIndex;
         this.rotationDegrees = settings.rotationDegrees;
-        this.rotationRadian = 0;
-
         this.audio = new Audio(specs!.audio);
 
         this.ctx = null;
         this.canvas = null;
 
         this.health = settings.health;
-
-        this.updateDirection();
     }
 
     /**
@@ -92,13 +69,7 @@ export default class Plane {
      *
      * @param canvas
      */
-    public setCanvas(canvas: HTMLCanvasElement)
-    {
-        this.worldHeight = canvas.height;
-        this.worldWidth = canvas.width;
-
-        // this.x = canvas.height / 3;
-        // this.y = canvas.width / 3;
+    public setCanvas(canvas: HTMLCanvasElement) {
 
         this.ctx = canvas.getContext("2d");
         this.canvas = canvas;
@@ -122,43 +93,42 @@ export default class Plane {
     }
 
     /**
+     * Fire a bullet
+     */
+    public fire() {
+        console.log('Firing');
+    }
+
+    /**
      * Steer plane to right
      */
-    public steerRight()
-    {
-        if (this.directionIndex === 7) {
-            this.directionIndex = 0;
-        } else {
-            this.directionIndex += 1;
+    public right() {
+        if (this.rotationDegrees === 360) {
+            this.rotationDegrees = 0;
         }
+
         this.rotationDegrees += 45;
-        this.updateDirection();
     }
 
     /**
      * Steer plane to left
      */
-    public steerLeft()
-    {
-        if (this.directionIndex === 0) {
-            this.directionIndex = 7;
-        } else {
-            this.directionIndex -= 1;
+    public left() {
+        if (this.rotationDegrees === 0) {
+            this.rotationDegrees = 360;
         }
         this.rotationDegrees -= 45;
-        this.updateDirection();
     }
 
     /**
      * Draw the place
      */
-    public draw()
-    {
-        if (this.ctx !== null && this.canvas !==null) {
+    public draw() {
+        if (this.ctx !== null && this.canvas !== null) {
 
             this.ctx.beginPath();
             this.ctx.setTransform(this.scale, 0, 0, this.scale, this.x, this.y); // sets scale and origin
-            this.ctx.rotate(this.rotationRadian);
+            this.ctx.rotate(this.getImageRotation());
             this.ctx.drawImage(
                 this.image,
                 -this.image.width / 2,
@@ -167,43 +137,71 @@ export default class Plane {
             this.ctx.closePath();
         }
 
-        // Going right
-        if (this.dx > 0 && this.x > this.canvas!.width + this.width / 2) {
+        this.move();
+        this.calculateVolume();
+    }
+
+    /**
+     * Move the plane
+     *
+     */
+
+    protected move() {
+
+        let pos = new PositionCalculator(this.x, this.y, this.speed, this.rotationDegrees);
+
+        this.x = pos.getNewX();
+        this.y = pos.getNewY();
+
+        this.detectBoundaries();
+
+    }
+
+    /**
+     * Detect boundary collisions
+     * TODO: Refactor in its own class
+     */
+    protected detectBoundaries()
+    {
+        // Right boundary
+        if (this.x > this.canvas!.width + this.width / 2) {
             this.x = -this.width / 2;
-            if (this.audio) {
-                this.audio.currentTime = 0;
-            }
+            this.restartAudio();
         }
 
-        // Going left
-        if (this.dx < 0 && this.x < -this.width / 2) {
+        // Left boundary
+        if (this.x < -this.width / 2) {
             this.x = this.canvas!.width + this.width / 2;
-            if (this.audio) this.audio.currentTime = 0;
+            this.restartAudio();
         }
 
         // Going down
-        if (this.dy > 0 && this.y > this.canvas!.height + this.height / 2) {
+        if (this.y > this.canvas!.height + this.height / 2) {
             this.y = -this.height / 2;
-            if (this.audio) this.audio.currentTime = 0;
+            this.restartAudio();
         }
 
         // Going up
-        if (this.dy < 0 && this.y < -this.height / 2) {
+        if (this.y < -this.height / 2) {
             this.y = this.canvas!.height + this.height / 2;
-            if (this.audio) this.audio.currentTime = 0;
+            this.restartAudio();
         }
+    }
 
-        this.x += this.dx;
-        this.y += this.dy;
 
-        this.calculateVolume();
+    /**
+     * Restart audio when plane appears again
+     */
+    protected restartAudio()
+    {
+        if (this.audio) this.audio.currentTime = 0;
     }
 
     /**
      * Calculate volume for th plane
      *
      */
-    protected  calculateVolume() {
+    protected calculateVolume() {
 
         if (this.audio) {
 
@@ -227,12 +225,9 @@ export default class Plane {
     }
 
     /**
-     * Update direction
-     *
+     * Get plane image rotation
      */
-    protected updateDirection() {
-        this.dx = Plane.directions[this.directionIndex].dx * this.speed;
-        this.dy = Plane.directions[this.directionIndex].dy * this.speed;
-        this.rotationRadian = (this.rotationDegrees * Math.PI) / 180;
+    protected getImageRotation() {
+        return ((this.rotationDegrees + Plane.IMAGE_ROTATION_DEGREES) * Math.PI) / 180;
     }
 }
