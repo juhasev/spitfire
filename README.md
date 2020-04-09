@@ -1,24 +1,24 @@
-# spitfire3
+# Spitfire
+![Spitfire](./logo.png)
+
+A simple two player 2nd World War dogfight game. This game is not completed.
+
+## Controls
+Player 1
+> Left and right arrows
+
+Player 2
+> Key A (left) and D (right)
 
 ## Project setup
+Clone project on the local machine:
+
+```
+git clone https://github.com/juhasev/spitfire.git
+```
+
+Next install Node dependencies
 ```
 npm install
-```
-
-### Compiles and hot-reloads for development
-```
 npm run serve
 ```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
