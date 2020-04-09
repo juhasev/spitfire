@@ -77,7 +77,7 @@ export default class Plane {
         this.hitAudio = new Audio('./bullet_hit.wav');
         this.hitAudio.volume = 0.3;
         this.gunAudio = new Audio('./gun_fire.wav');
-        this.gunAudio.volume = 0.3;
+        this.gunAudio.volume = 0.2;
 
         this.ctx = null;
         this.canvas = null;

@@ -16,14 +16,14 @@
                     <v-col>
 
                     </v-col>
-                    <v-col cols="3">
-                        <health-bar v-if="planeOneHealth && planeOneHealth>=0" :value="planeOneHealth"></health-bar>
+                    <v-col cols="4">
+                        <health-bar v-if="planeOneHealth && planeOneHealth>=0" :value="planeOneHealth" :name="playerA"></health-bar>
                     </v-col>
-                    <v-col cols="4" class="text-center">
-                        <v-btn class="mt-1" small @click="settingsClicked" color="primary">SETTINGS</v-btn>
+                    <v-col cols="2" class="text-center">
+
                     </v-col>
-                    <v-col cols="3">
-                        <health-bar v-if="planeTwoHealth && planeTwoHealth>=0" :value="planeTwoHealth"></health-bar>
+                    <v-col cols="4">
+                        <health-bar v-if="planeTwoHealth && planeTwoHealth>=0" :value="planeTwoHealth" :name="playerB"></health-bar>
                     </v-col>
                     <v-col>
 
@@ -32,26 +32,18 @@
             </v-container>
         </div>
 
-        <!-- SETTING MODEL -->
-        <v-dialog v-model="settingsDialogModel" width="500">
+        <!-- WELCOME DIALOG -->
+        <v-dialog v-model="welcomeDialogModel" persistent width="1000">
 
-            <v-card class="mx-auto">
-                <v-toolbar dark color="primary">
-
-                    <v-toolbar-title>
-                        Settings
-                    </v-toolbar-title>
-
-                    <v-spacer></v-spacer>
-
-                    <v-btn icon @click="settingsDialogModel=false">
-                        <v-icon>mdi-close</v-icon>
-                    </v-btn>
-
-                </v-toolbar>
-                <v-card-text>
+            <v-card>
+                <v-img src="logo.png"></v-img>
+                <v-card-text class="pt-6 display-4 text-center">
                     <v-switch v-model="sounds" class="mt-5" @change="soundsToggled" label="Enable sounds"></v-switch>
+                    <v-text-field v-model="playerA" persistent-hint hint="Player one name"></v-text-field>
+                    <v-text-field v-model="playerB" persistent-hint hint="Player two name"></v-text-field>
+                    <v-btn color="primary" class="body-1" @click="startGame">START GAME</v-btn>
                 </v-card-text>
+
             </v-card>
         </v-dialog>
 
@@ -59,20 +51,9 @@
         <v-dialog v-model="gameOverDialogModel" width="600">
 
             <v-card>
-               <v-card-text class="pt-6 display-4 text-center">
-                   GAME OVER
-                   <div class="caption">Restarting....</div>
-               </v-card-text>
-            </v-card>
-        </v-dialog>
-
-        <!-- WELCOME DIALOG -->
-        <v-dialog v-model="welcomeDialogModel" persistent width="600">
-
-            <v-card>
-                <v-img src="logo.png"></v-img>
                 <v-card-text class="pt-6 display-4 text-center">
-                    <div class="caption">Press SPACE to play</div>
+                    GAME OVER
+                    <div class="caption">Restarting....</div>
                 </v-card-text>
             </v-card>
         </v-dialog>
@@ -108,8 +89,9 @@
                 planeTwo: null,
                 clouds: [],
                 welcomeDialogModel: true,
-                settingsDialogModel: false,
                 gameOverDialogModel: false,
+                playerA: '',
+                playerB: ''
             };
         },
 
@@ -124,13 +106,12 @@
             }
         },
 
-        mounted() {
-
-        },
-
         methods: {
 
             createGame() {
+
+                this.welcomeDialogModel = false;
+                this.gameOverDialogModel = false;
 
                 this.sky = new Sky(this.$refs.sky);
                 this.sky.gameOverHandler = this.gameOver;

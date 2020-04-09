@@ -1,18 +1,21 @@
 <template>
     <div class="d-flex">
+
+        <div class="title grey--text text-darken-4 pl-2 pr-2">
+            {{name.toUpperCase()}}
+        </div>
+
         <v-progress-linear
                 striped
                 class="ma-3"
                 height="10"
                 :value="value"
-                :color="color">
-        </v-progress-linear>
+                :color="color"
+        ></v-progress-linear>
 
-        <div class="title">
-            <v-sheet :color="color" class="white--text pl-2 pr-2">
+        <v-sheet :color="color" class="white--text pl-2 pr-2 pt-1">
             {{value}}
-            </v-sheet>
-        </div>
+        </v-sheet>
     </div>
 </template>
 
@@ -24,6 +27,10 @@
             value: {
                 required: true,
                 type: Number,
+            },
+            name: {
+                required: true,
+                type: String
             }
         },
 
