@@ -1,12 +1,13 @@
 import PlaneTypeInterface from "@/ts/Interfaces/PlaneTypeInterface";
 import DirectionInterface from "@/ts/Interfaces/DirectionInterface";
+import PlaneSettingsInterface from "@/ts/Interfaces/PlaneSettingsInterface";
 
 export default class Plane {
 
     public static planeTypes: Array<PlaneTypeInterface> = [
-        {name: "mustang", image: '/plane.png'},
-        {name: "spitfire", image: '/spitfire.png'},
-        {name: "junker", image: '/junker.png'},
+        {name: "mustang", image: '/plane.png', audio: "spitfire.mp3"},
+        {name: "spitfire", image: '/spitfire.png', audio: "spitfire.mp3"},
+        {name: "junker", image: '/junker.png', audio: "spitfire.mp3"},
     ];
 
     public static directions: Array<DirectionInterface> = [
@@ -47,7 +48,7 @@ export default class Plane {
      *
      * @param type
      */
-    constructor(type: string) {
+    constructor(type: string, settings: PlaneSettingsInterface) {
 
         const specs = Plane.planeTypes.find((planeType: PlaneTypeInterface) => {
             return planeType.name === type;
@@ -56,25 +57,25 @@ export default class Plane {
         this.image = new Image(); // Using optional size for image
         this.image.src = specs!.image;
 
-        this.speed = 5;
+        this.speed = settings.speed;
 
         this.worldHeight = 0;
         this.worldWidth = 0;
 
-        this.x = 0;
-        this.y = 0;
+        this.x = settings.x;
+        this.y = settings.y;
         this.dx = 0
         this.dy = 0;
 
-        this.width = 100;
-        this.height = 100;
-        this.scale = 0.25;
+        this.width = settings.width;
+        this.height = settings.height;
+        this.scale = settings.scale;
 
-        this.directionIndex = 0;
-        this.rotationDegrees = 90;
+        this.directionIndex = settings.directionIndex;
+        this.rotationDegrees = settings.rotationDegrees;
         this.rotationRadian = 0;
 
-        this.audio = new Audio("spitfire.mp3");
+        this.audio = new Audio(specs!.audio);
 
         this.ctx = null;
         this.canvas = null;
@@ -92,8 +93,8 @@ export default class Plane {
         this.worldHeight = canvas.height;
         this.worldWidth = canvas.width;
 
-        this.x = canvas.height / 3;
-        this.y = canvas.width / 3;
+        // this.x = canvas.height / 3;
+        // this.y = canvas.width / 3;
 
         this.ctx = canvas.getContext("2d");
         this.canvas = canvas;
