@@ -6,7 +6,7 @@
 
         <keypress :key-code="65" event="keydown" @pressed="planeTwo.left()"/>
         <keypress :key-code="68" event="keydown" @pressed="planeTwo.right()"/>
-        <keypress :key-code="119" event="keydown" @pressed="planeTwo.fire()"/>
+        <keypress :key-code="87" event="keydown" @pressed="planeTwo.fire()"/>
 
         <div class="debug">
             <v-container fluid class="pa-0">
@@ -30,6 +30,7 @@
             </v-container>
         </div>
 
+        <!-- SETTING MODEL -->
         <v-dialog v-model="settingsModel" width="500">
 
             <v-card class="mx-auto">
@@ -41,7 +42,7 @@
 
                     <v-spacer></v-spacer>
 
-                    <v-btn icon flat @click="settingsModel=false">
+                    <v-btn icon @click="settingsModel=false">
                         <v-icon>mdi-close</v-icon>
                     </v-btn>
 
@@ -52,6 +53,18 @@
             </v-card>
         </v-dialog>
 
+        <!-- GAME OVER DIALOG -->
+        <v-dialog v-model="gameOverDialogModel" width="600">
+
+            <v-card>
+               <v-card-text class="pt-6 display-4">
+                   GAME OVER
+                   <div class="caption">Reload to restart</div>
+               </v-card-text>
+            </v-card>
+        </v-dialog>
+
+        <!-- 2D Canvas -->
         <canvas class="sky" ref="sky"></canvas>
     </div>
 </template>
@@ -77,11 +90,12 @@
         data() {
             return {
                 sky: null,
-                sounds: false,
+                sounds: true,
                 planeOne: null,
                 planeTwo: null,
                 clouds: [],
                 settingsModel: false,
+                gameOverDialogModel: false,
             };
         },
 
@@ -99,10 +113,11 @@
         mounted() {
 
             this.sky = new Sky(this.$refs.sky);
+            this.sky.gameOverHandler = this.gameOver;
 
             this.planeOne = new Plane('spitfire', {
                 speed: 5,
-                health: 19,
+                health: 100,
                 rotationDegrees: 0,
                 width: 100,
                 height: 100,
@@ -122,6 +137,9 @@
                 y: this.$refs.sky.height / 3 + 50
             });
 
+            this.planeOne.toggleSounds(this.sounds);
+            this.planeTwo.toggleSounds(this.sounds);
+
             this.sky.addPlane(this.planeOne);
             this.sky.addPlane(this.planeTwo);
             this.sky.animate();
@@ -136,6 +154,11 @@
             soundsToggled() {
                 this.planeOne.toggleSounds(this.sounds);
             },
+
+            gameOver() {
+                this.gameOverDialogModel = true;
+                console.log("PLANE CRASH");
+            }
         }
     };
 </script>

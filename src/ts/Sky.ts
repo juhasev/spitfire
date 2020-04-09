@@ -1,5 +1,7 @@
 import CloudInterface from "@/ts/Interfaces/CloudInterface";
 import Plane from "@/ts/Plane";
+import Bullet from "@/ts/Bullet";
+import DistanceCalculator from "@/ts/DistanceCalculator";
 
 export default class Sky {
 
@@ -8,6 +10,8 @@ export default class Sky {
     private clouds: Array<CloudInterface>;
     private cloudsGrowing: boolean;
     private planes: Array<Plane>;
+    private gameOver: boolean;
+    public gameOverHandler: () => void;
 
     /**
      * Sky constructor
@@ -23,6 +27,8 @@ export default class Sky {
         this.cloudsGrowing = true;
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
+        this.gameOver = false;
+        this.gameOverHandler = () => {};
         this.designClouds();
 
         console.log("SKY INITIALIZED");
@@ -45,15 +51,75 @@ export default class Sky {
      */
     public animate() {
 
+        if (this.gameOver) return;
+
         this.clearSky();
 
         this.planes.forEach((plane: Plane) => {
-            plane.draw();
+
+            if (plane.hasCrashed()) {
+                if (this.gameOverHandler) this.gameOverHandler();
+                this.gameOver = true;
+            }
+
+            if (this.gameOver) {
+                plane.toggleSounds(false);
+            }
+
+            if (!this.gameOver) {
+                plane.draw();
+
+                let enemyBullets = this.getEnemyBullets(plane.name);
+
+                enemyBullets.forEach((bullet: Bullet) => {
+                    this.detectCollision(plane, bullet);
+                });
+            }
         });
 
         this.drawClouds();
 
         requestAnimationFrame(this.animate.bind(this));
+    }
+
+    /**
+     * Get enemy bullets
+     *
+     * @param name
+     */
+    protected getEnemyBullets(name: string)
+    {
+        let bullets: Array<Bullet> = [];
+
+        this.planes.forEach((planeOther: Plane) => {
+
+            // Filter out friendly fire
+            if (planeOther.name !== name) {
+                bullets = [...bullets,...planeOther.getBullets()];
+            }
+        });
+
+        return bullets;
+    }
+
+    protected isGameOver() {
+        return this.gameOver;
+    }
+
+    /**
+     * Detect bullet hitting plane
+     *
+     * @param plane
+     * @param bullet
+     */
+    protected detectCollision(plane: Plane, bullet: Bullet)
+    {
+        const distance = new DistanceCalculator(plane.getX(), plane.getY(), bullet.getX(), bullet.getY()).getDistance();
+
+        if (distance < 50) {
+            bullet.hit();
+            plane.addDamage(10);
+        }
     }
 
     /**
@@ -113,14 +179,13 @@ export default class Sky {
             this.ctx.fillStyle = "white";
             this.ctx.fill();
             this.ctx.fill();
-            //this.ctx.stroke();
             this.ctx.closePath();
         }
     }
 
     /**
      * Design clouds
-     *
+     * TODO: Break in its own class
      */
     protected designClouds() {
         let horizontalPixelsRemaining = this.canvas.width;

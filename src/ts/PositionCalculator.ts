@@ -17,12 +17,6 @@ export default class PositionCalculator {
         let xDistance = Math.round(Math.cos(radians) * speed);
         let yDistance = Math.round(Math.sin(radians) * speed);
 
-        // console.log("Rotation: " + rotation);
-        // console.log("Radians: " + radians);
-        // console.log("X: " + xDistance);
-        // console.log("Y: " + yDistance);
-        // console.log("Speed: " + speed);
-
         this.x = currentX + xDistance;
         this.y = currentY + yDistance;
     }

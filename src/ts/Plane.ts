@@ -1,6 +1,7 @@
 import PlaneTypeInterface from "@/ts/Interfaces/PlaneTypeInterface";
 import PlaneSettingsInterface from "@/ts/Interfaces/PlaneSettingsInterface";
 import PositionCalculator from "@/ts/PositionCalculator";
+import Bullet from "@/ts/Bullet";
 
 export default class Plane {
 
@@ -11,21 +12,29 @@ export default class Plane {
 
     public static planeTypes: Array<PlaneTypeInterface> = [
         {name: "mustang", image: '/plane.png', audio: "spitfire.mp3"},
-        {name: "spitfire", image: '/spitfire.png', audio: "spitfire.mp3"},
-        {name: "junker", image: '/junker.png', audio: "spitfire.mp3"},
+        {name: "spitfire", image: '/spitfire.png', audio: "spitfire2.mp3"},
+        {name: "junker", image: '/junker.png', audio: "spitfire2.mp3"},
     ];
 
+    public name: string;
+
     public health: number;
+    public crashed: boolean;
+
+    private fallingOutOfSky: boolean;
 
     private speed: number;
     private x: number;
     private y: number;
     private audio: HTMLAudioElement;
+    private crashAudio: HTMLAudioElement;
     private image: HTMLImageElement;
 
     private width: number;
     private height: number;
     private scale: number;
+
+    private bullets: Array<Bullet>;
 
     private rotationDegrees: number;
 
@@ -36,12 +45,15 @@ export default class Plane {
      * Plane constructor
      *
      * @param type
+     * @param settings
      */
     constructor(type: string, settings: PlaneSettingsInterface) {
 
         const specs = Plane.planeTypes.find((planeType: PlaneTypeInterface) => {
             return planeType.name === type;
         });
+
+        this.name = specs!.name;
 
         this.image = new Image(); // Using optional size for image
         this.image.src = specs!.image;
@@ -57,11 +69,16 @@ export default class Plane {
 
         this.rotationDegrees = settings.rotationDegrees;
         this.audio = new Audio(specs!.audio);
+        this.crashAudio = new Audio('./plane_crash.wav');
 
         this.ctx = null;
         this.canvas = null;
 
         this.health = settings.health;
+        this.bullets = [];
+
+        this.fallingOutOfSky = false;
+        this.crashed = false;
     }
 
     /**
@@ -96,13 +113,19 @@ export default class Plane {
      * Fire a bullet
      */
     public fire() {
-        console.log('Firing');
+
+        if (this.canvas) {
+            this.bullets.push(new Bullet(this.canvas, this.x, this.y, this.rotationDegrees));
+        }
     }
 
     /**
      * Steer plane to right
      */
     public right() {
+
+        if (this.fallingOutOfSky) return;
+
         if (this.rotationDegrees === 360) {
             this.rotationDegrees = 0;
         }
@@ -114,10 +137,36 @@ export default class Plane {
      * Steer plane to left
      */
     public left() {
+
+        if (this.fallingOutOfSky) return;
+
         if (this.rotationDegrees === 0) {
             this.rotationDegrees = 360;
         }
         this.rotationDegrees -= 45;
+    }
+
+    public addDamage(damage: number) {
+
+        if (damage > this.health) {
+            this.health = 0;
+        } else {
+            this.health -= damage;
+        }
+
+        if (this.health === 0) {
+            this.fallingOutOfSky = true;
+            this.audio.pause();
+            this.crashAudio.play();
+        }
+    }
+
+    public getBullets() {
+        return this.bullets;
+    }
+
+    public hasCrashed() {
+        return this.crashed;
     }
 
     /**
@@ -137,8 +186,43 @@ export default class Plane {
             this.ctx.closePath();
         }
 
+        this.bullets.forEach((bullet) =>  {
+            bullet.render();
+        });
+
+        // Remove bullets no longer flying
+        this.bullets = this.bullets.filter(bullet => {
+            return bullet.isFlying();
+        });
+
+        if (this.fallingOutOfSky) {
+            if (this.rotationDegrees !== 90) {
+                if (this.rotationDegrees < 90) {
+                    this.rotationDegrees += 1;
+                    this.speed = this.speed + 0.1;
+                }
+
+                if (this.rotationDegrees > 90) {
+                    this.rotationDegrees -= 1;
+                    this.speed = this.speed + 0.1;
+                }
+            }
+
+            setTimeout(() => {
+                this.crashed = true;
+            }, 8000);
+        }
+
         this.move();
         this.calculateVolume();
+    }
+
+    public getX() {
+        return this.x;
+    }
+
+    public getY() {
+        return this.y;
     }
 
     /**
@@ -154,7 +238,6 @@ export default class Plane {
         this.y = pos.getNewY();
 
         this.detectBoundaries();
-
     }
 
     /**
@@ -163,6 +246,13 @@ export default class Plane {
      */
     protected detectBoundaries()
     {
+        if (this.fallingOutOfSky) {
+            if (this.audio.playbackRate < 2) {
+                this.audio.playbackRate += 0.1;
+            }
+            return;
+        }
+
         // Right boundary
         if (this.x > this.canvas!.width + this.width / 2) {
             this.x = -this.width / 2;
