@@ -2,6 +2,8 @@ import CloudInterface from "@/ts/Interfaces/CloudInterface";
 import Plane from "@/ts/Plane";
 import Bullet from "@/ts/Bullet";
 import DistanceCalculator from "@/ts/DistanceCalculator";
+import PointToLineDistanceCalculator from "@/ts/PointToLineDistanceCalculator";
+import PositionCalculator from "@/ts/PositionCalculator";
 
 export default class Sky {
 
@@ -73,7 +75,7 @@ export default class Sky {
                 let enemyBullets = this.getEnemyBullets(plane.name);
 
                 enemyBullets.forEach((bullet: Bullet) => {
-                    this.detectCollision(plane, bullet);
+                    this.detectBulletCollision(plane, bullet);
                 });
             }
         });
@@ -102,44 +104,30 @@ export default class Sky {
         return bullets;
     }
 
-    protected isGameOver() {
-        return this.gameOver;
-    }
-
     /**
      * Detect bullet hitting plane
      *
      * @param plane
      * @param bullet
      */
-    protected detectCollision(plane: Plane, bullet: Bullet) {
+    protected detectBulletCollision(plane: Plane, bullet: Bullet) {
         const distance = new DistanceCalculator(plane.getX(), plane.getY(), bullet.getX(), bullet.getY()).getDistance();
 
         if (distance >= 40) return;
 
-        if (distance < 10) {
-            plane.addDamage(30);
-            bullet.hit();
-            return;
-        }
+        // Calculate coordinates why past the place
+        const position = new PositionCalculator(bullet.getX(), bullet.getY(), 100, bullet.getDirection());
 
-        if (distance < 20) {
-            plane.addDamage(20);
-            bullet.hit();
-            return;
-        }
+        // Figure out how close the bullet is hitting from plane's center point
+        const closestDistance = new PointToLineDistanceCalculator(plane.getX(), plane.getY(), bullet.getX(), bullet.getY(), position.getNewX(), position.getNewY()).getDistance();
 
-        if (distance < 30) {
-            plane.addDamage(10);
-            bullet.hit();
-            return;
-        }
+        // More damage the closer the plane centerpoint
+        const damage = Math.round(40 - closestDistance);
 
-        if (distance < 40) {
-            plane.addDamage(5);
-            bullet.hit();
-            return;
-        }
+        plane.addDamage(damage);
+        bullet.hit();
+
+        console.log("Damage (" + damage + ") to plane " + plane.name);
     }
 
     /**

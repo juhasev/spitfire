@@ -17,13 +17,15 @@
 
                     </v-col>
                     <v-col cols="4">
-                        <health-bar v-if="planeOneHealth && planeOneHealth>=0" :value="planeOneHealth" :name="playerA"></health-bar>
+                        <health-bar v-if="planeOneHealth && planeOneHealth>=0" :value="planeOneHealth"
+                                    :name="playerA"></health-bar>
                     </v-col>
                     <v-col cols="2" class="text-center">
 
                     </v-col>
                     <v-col cols="4">
-                        <health-bar v-if="planeTwoHealth && planeTwoHealth>=0" :value="planeTwoHealth" :name="playerB"></health-bar>
+                        <health-bar v-if="planeTwoHealth && planeTwoHealth>=0" :value="planeTwoHealth"
+                                    :name="playerB"></health-bar>
                     </v-col>
                     <v-col>
 
@@ -40,7 +42,8 @@
                 <v-card-text class="pt-6 display-4 text-center">
                     <v-switch v-model="sounds" class="mt-5" @change="soundsToggled" label="Enable sounds"></v-switch>
                     <v-text-field v-model="playerA" persistent-hint hint="Player one name" autofocus></v-text-field>
-                    <v-text-field v-model="playerB" persistent-hint hint="Player two name" @keydown.enter="startGame"></v-text-field>
+                    <v-text-field v-model="playerB" persistent-hint hint="Player two name"
+                                  @keydown.enter="startGame"></v-text-field>
                     <v-btn color="primary" class="body-1" @click="startGame">START GAME</v-btn>
                 </v-card-text>
 
@@ -68,6 +71,7 @@
     import Sky from "../ts/Sky.ts";
     import Plane from "../ts/Plane.ts";
     import HealthBar from "@/components/HealthBar";
+    import PointToLineDistanceCalculator from "@/ts/PointToLineDistanceCalculator";
 
     export default {
         name: "Spitfire",
@@ -104,6 +108,24 @@
                 if (this.planeTwo) return this.planeTwo.health;
                 return null;
             }
+        },
+
+        mounted() {
+
+            // Known point
+            const x1 = -6;
+            const y1 = 0;
+
+            // Second known point
+            const x2 = 6;
+            const y2 = 0;
+
+            const x = 2;
+            const y = 3;
+
+            const distance = new PointToLineDistanceCalculator(x,y,x1,y1,x2,y2).getDistance();
+
+            console.log(distance);
         },
 
         methods: {

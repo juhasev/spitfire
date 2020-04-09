@@ -4,8 +4,9 @@ export default class Bullet {
 
     static BULLET_SPEED = 25;
 
-    private x: number;
-    private y: number;
+    public x: number;
+    public y: number;
+
     private directionDegrees: number;
     private ctx: CanvasRenderingContext2D | null;
     private canvas: HTMLCanvasElement | null;

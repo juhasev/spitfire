@@ -2,6 +2,8 @@ export default class PositionCalculator {
 
     protected x:number;
     protected y:number;
+    protected currentX:number;
+    protected currentY:number;
 
     /**
      * Calculate planes next position given current x,y,speed and rotation
@@ -16,6 +18,9 @@ export default class PositionCalculator {
         let radians = this.toRadians(rotation);
         let xDistance = Math.round(Math.cos(radians) * speed);
         let yDistance = Math.round(Math.sin(radians) * speed);
+
+        this.currentX = currentX;
+        this.currentY = currentY;
 
         this.x = currentX + xDistance;
         this.y = currentY + yDistance;
@@ -35,6 +40,14 @@ export default class PositionCalculator {
     public getNewY()
     {
         return this.y;
+    }
+
+    /**
+     * Get line gradient or slope
+     */
+    public getGradient()
+    {
+        return (this.y - this.currentY) / (this.x - this.currentX);
     }
 
     /**
