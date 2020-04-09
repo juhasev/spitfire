@@ -39,8 +39,8 @@
                 <v-img src="logo.png"></v-img>
                 <v-card-text class="pt-6 display-4 text-center">
                     <v-switch v-model="sounds" class="mt-5" @change="soundsToggled" label="Enable sounds"></v-switch>
-                    <v-text-field v-model="playerA" persistent-hint hint="Player one name"></v-text-field>
-                    <v-text-field v-model="playerB" persistent-hint hint="Player two name"></v-text-field>
+                    <v-text-field v-model="playerA" persistent-hint hint="Player one name" autofocus></v-text-field>
+                    <v-text-field v-model="playerB" persistent-hint hint="Player two name" @keydown.enter="startGame"></v-text-field>
                     <v-btn color="primary" class="body-1" @click="startGame">START GAME</v-btn>
                 </v-card-text>
 
