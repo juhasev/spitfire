@@ -1,7 +1,8 @@
 ![Spitfire](./logo.png)
 
 # Spitfire
-A simple two player 2nd World War dogfight game. Please note that this game is not completed!
+A simple two player 2nd World War dogfight game. This game uses HTML 5 Canvas element for the game graphics.
+UI is implemented using Vue / Vuetify. Please note that this game is not completed!
 
 Missing features:
 - Shooting
