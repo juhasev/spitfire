@@ -116,9 +116,30 @@ export default class Sky {
     {
         const distance = new DistanceCalculator(plane.getX(), plane.getY(), bullet.getX(), bullet.getY()).getDistance();
 
-        if (distance < 50) {
+        if (distance >= 40) return;
+
+        if (distance < 10) {
+            plane.addDamage(30);
             bullet.hit();
+            return;
+        }
+
+        if (distance < 20) {
+            plane.addDamage(20);
+            bullet.hit();
+            return;
+        }
+
+        if (distance < 30) {
             plane.addDamage(10);
+            bullet.hit();
+            return;
+        }
+
+        if (distance < 40) {
+            plane.addDamage(5);
+            bullet.hit();
+            return;
         }
     }
 

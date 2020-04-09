@@ -221,40 +221,52 @@ export default class Plane {
         });
 
         if (this.fallingOutOfSky) {
-            if (this.rotationDegrees !== 90) {
-                if (this.rotationDegrees < 90) {
-                    this.rotationDegrees += 1;
-                    this.speed = this.speed + 0.1;
-                }
-
-                if (this.rotationDegrees > 90) {
-                    this.rotationDegrees -= 1;
-                    this.speed = this.speed + 0.1;
-                }
-            }
-
-            setTimeout(() => {
-                this.crashed = true;
-            }, 8000);
+            this.fallOutOfSky();
         }
 
         this.move();
         this.calculateVolume();
     }
 
+    /**
+     * Handle falling out of sky
+     */
+    protected fallOutOfSky() {
+
+        if (this.rotationDegrees !== 90) {
+            if (this.rotationDegrees < 90) {
+                this.rotationDegrees += 1;
+                this.speed = this.speed + 0.1;
+            }
+
+            if (this.rotationDegrees > 90) {
+                this.rotationDegrees -= 1;
+                this.speed = this.speed + 0.1;
+            }
+        }
+
+        setTimeout(() => {
+            this.crashed = true;
+        }, 8000);
+    }
+
+    /**
+     * Get current X coordinate
+     */
     public getX() {
         return this.x;
     }
 
+    /**
+     * Get current Y coordinate
+     */
     public getY() {
         return this.y;
     }
 
     /**
      * Move the plane
-     *
      */
-
     protected move() {
 
         let pos = new PositionCalculator(this.x, this.y, this.speed, this.rotationDegrees);
