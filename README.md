@@ -1,7 +1,13 @@
-# Spitfire
 ![Spitfire](./logo.png)
 
-A simple two player 2nd World War dogfight game. This game is not completed.
+# Spitfire
+A simple two player 2nd World War dogfight game. Please note that this game is not completed!
+
+Missing features:
+- Shooting
+- Smoke trail when damaged
+- Plane health counter
+- Crash of the sky
 
 ## Controls
 Player 1
@@ -22,3 +28,8 @@ Next install Node dependencies
 npm install
 npm run serve
 ```
+
+Next click on the link below to start the game in the browser
+
+[http://localhost:8081/](http://localhost:8081/)
+
