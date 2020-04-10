@@ -169,27 +169,22 @@ export default class Plane {
     public right() {
 
         if (this.fallingOutOfSky) return;
-
-        if (this.directionDegrees === 360) {
-            this.directionDegrees = 0;
-        }
-
-        this.directionDegrees += 1;
+        this.incrementDirection(1);
     }
 
     /**
      * Steer plane to left
      */
     public left() {
-
         if (this.fallingOutOfSky) return;
-
-        if (this.directionDegrees === 0) {
-            this.directionDegrees = 360;
-        }
-        this.directionDegrees -= 1;
+        this.decrementDirection(1);
     }
 
+    /**
+     * Add damage
+     *
+     * @param damage
+     */
     public addDamage(damage: number) {
 
         this.hitAudio.currentTime = 0;
@@ -212,14 +207,23 @@ export default class Plane {
         if (this.health < 20) this.speed -= 1;
     }
 
+    /**
+     * Get bullets fires by the plane
+     */
     public getBullets() {
         return this.bullets;
     }
 
+    /**
+     * Has plane crashed?
+     */
     public hasCrashed() {
         return this.crashed;
     }
 
+    /**
+     * Adjust speed
+     */
     protected adjustSpeedBasedOnDirection() {
 
         // Plane heading sharply up take down the speed
@@ -358,13 +362,6 @@ export default class Plane {
     }
 
     /**
-     * Get rotation angle
-     */
-    public getDirection() {
-        return this.directionDegrees;
-    }
-
-    /**
      * Move the plane
      */
     protected move() {
@@ -379,9 +376,9 @@ export default class Plane {
 
     /**
      * Detect boundary collisions
-     * TODO: Refactor in its own class
      */
     protected detectBoundaries() {
+
         if (this.fallingOutOfSky) {
             if (this.audio.playbackRate < 2) {
                 this.audio.playbackRate += 0.1;
@@ -414,7 +411,6 @@ export default class Plane {
             }
         }
     }
-
 
     /**
      * Restart audio when plane appears again
@@ -485,6 +481,11 @@ export default class Plane {
         if (event.key === this.keyFire) this.keyFirePressed = pressed;
     }
 
+    /**
+     * Increment direction
+     *
+     * @param increment
+     */
     protected incrementDirection(increment: number) {
         this.directionDegrees += increment;
 
@@ -493,6 +494,11 @@ export default class Plane {
         }
     }
 
+    /**
+     * Decrement direction
+     *
+     * @param decrement
+     */
     protected decrementDirection(decrement: number) {
         this.directionDegrees -= decrement;
 
