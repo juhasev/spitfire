@@ -220,6 +220,32 @@ export default class Plane {
         return this.crashed;
     }
 
+    protected adjustSpeedBasedOnDirection() {
+
+        // Plane heading sharply up take down the speed
+        if (this.speed >= 3 && this.directionDegrees >= 225 && this.directionDegrees <= 325) {
+            this.speed -=0.005;
+            return;
+        }
+
+        // Plane heading sharply down increase the speed
+        if (this.speed <= 10 && this.directionDegrees >= 45 && this.directionDegrees <= 135) {
+            this.speed +=0.01;
+            return;
+        }
+
+        // Return speed back to normal when out of extreme angles
+        if (this.speed > 7) {
+            this.speed -=0.005;
+            return;
+        }
+
+        if (this.speed < 7) {
+            this.speed +=0.005;
+            return;
+        }
+    }
+
     /**
      * Draw the place
      */
@@ -228,6 +254,8 @@ export default class Plane {
         if (this.keyLeftPressed) this.left();
         if (this.keyRightPressed) this.right();
         if (this.keyFirePressed) this.fire();
+
+        this.adjustSpeedBasedOnDirection();
 
         if (this.ctx !== null && this.canvas !== null) {
 
