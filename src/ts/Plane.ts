@@ -83,10 +83,10 @@ export default class Plane {
 
         this.directionDegrees = settings.directionDegrees;
         this.audio = new Audio(specs!.audio);
-        this.crashAudio = new Audio('./plane_crash.wav');
-        this.hitAudio = new Audio('./bullet_hit.wav');
+        this.crashAudio = new Audio('plane_crash.wav');
+        this.hitAudio = new Audio('bullet_hit.wav');
         this.hitAudio.volume = 0.3;
-        this.gunAudio = new Audio('./gun_fire.wav');
+        this.gunAudio = new Audio('gun_fire.wav');
         this.gunAudio.volume = 0.2;
 
         this.keyLeft = settings.keyLeft;
