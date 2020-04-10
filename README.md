@@ -10,7 +10,7 @@ UI is implemented using Vue / Vuetify. Before you get into playing here are some
 4) Damage will decrease your plane's speed
 5) Planes emit smoke based on their damage level
 6) Clouds start getting ticker at the beginning of the game (hint: hide) and cycle back and forth after that
-7) Firing when only needed can make you more accurate
+7) Firing only when needed can make you more accurate
 
 ## Controls
 Player 1
