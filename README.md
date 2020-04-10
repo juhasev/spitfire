@@ -2,10 +2,14 @@
 
 # Spitfire
 A simple two player 2nd World War dogfight game. This game uses HTML 5 Canvas element for the game graphics.
-UI is implemented using Vue / Vuetify. Game features:
+UI is implemented using Vue / Vuetify. Before you get in the player please be aware that
 
-1) Location sensitive damage from 1 to 40 per hit
-2) Smoke trails from damaged planes
+1) Damage varies from 1 to 40 per hit depending on how close to the center of fuselage you hit
+2) If you go up in an extreme angle your plane will slow down
+3) If you do down your plane's speed will increase
+4) Damage will also decrease your plane speed
+5) Planes emit smoke based on their damage level
+6) Clouds start getting ticker at the beginning of the game (hint: hide)
 
 ## Controls
 Player 1
