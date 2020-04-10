@@ -14,6 +14,13 @@ Player 1
 Player 2
 > Key A (left) and D (right)
 
+## Tools setup
+Open terminal window
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+brew install git npm
+```
+
 ## Project setup
 Clone project on the local machine:
 

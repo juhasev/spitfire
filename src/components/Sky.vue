@@ -1,12 +1,12 @@
 <template>
     <div>
-        <keypress :key-code="37" event="keydown" @pressed="planeOne.left()"/>
-        <keypress :key-code="39" event="keydown" @pressed="planeOne.right()"/>
-        <keypress :key-code="38" event="keydown" @pressed="planeOne.fire()"/>
+        <keypress v-if="!welcomeDialogModel" :key-code="37" event="keydown" @pressed="planeOne.left()"/>
+        <keypress v-if="!welcomeDialogModel" :key-code="39" event="keydown" @pressed="planeOne.right()"/>
+        <keypress v-if="!welcomeDialogModel" :key-code="38" event="keydown" @pressed="planeOne.fire()"/>
 
-        <keypress :key-code="65" event="keydown" @pressed="planeTwo.left()"/>
-        <keypress :key-code="68" event="keydown" @pressed="planeTwo.right()"/>
-        <keypress :key-code="87" event="keydown" @pressed="planeTwo.fire()"/>
+        <keypress v-if="!welcomeDialogModel" :key-code="65" event="keydown" @pressed="planeTwo.left()"/>
+        <keypress v-if="!welcomeDialogModel" :key-code="68" event="keydown" @pressed="planeTwo.right()"/>
+        <keypress v-if="!welcomeDialogModel" :key-code="87" event="keydown" @pressed="planeTwo.fire()"/>
 
         <keypress :key-code="32" event="keydown" @pressed="startGame"/>
 
@@ -17,15 +17,17 @@
 
                     </v-col>
                     <v-col cols="4">
-                        <health-bar v-if="planeOneHealth && planeOneHealth>=0" :value="planeOneHealth"
-                                    :name="playerA"></health-bar>
+                        <health-bar v-if="planeOneHealth!==null && planeOneHealth>=0"
+                                    :value="planeOneHealth"
+                                    :name="playerOne"></health-bar>
                     </v-col>
                     <v-col cols="2" class="text-center">
 
                     </v-col>
                     <v-col cols="4">
-                        <health-bar v-if="planeTwoHealth && planeTwoHealth>=0" :value="planeTwoHealth"
-                                    :name="playerB"></health-bar>
+                        <health-bar v-if="planeTwoHealth!==null && planeTwoHealth>=0"
+                                    :value="planeTwoHealth"
+                                    :name="playerTwo"></health-bar>
                     </v-col>
                     <v-col>
 
@@ -41,10 +43,24 @@
                 <v-img src="logo.png"></v-img>
                 <v-card-text class="pt-6 display-4 text-center">
                     <v-switch v-model="sounds" class="mt-5" @change="soundsToggled" label="Enable sounds"></v-switch>
-                    <v-text-field v-model="playerA" persistent-hint hint="Player one name" autofocus></v-text-field>
-                    <v-text-field v-model="playerB" persistent-hint hint="Player two name"
-                                  @keydown.enter="startGame"></v-text-field>
-                    <v-btn color="primary" class="body-1" @click="startGame">START GAME</v-btn>
+
+                    <v-text-field
+                            v-model="playerOne"
+                            persistent-hint
+                            hint="Player one name"
+                            autofocus
+                            :rules=[rules.required]
+                    ></v-text-field>
+
+                    <v-text-field
+                            v-model="playerTwo"
+                            persistent-hint hint="Player two name"
+                            :rules=[rules.required]
+                            @keydown.enter="startGame"
+                    ></v-text-field>
+
+                    <v-btn color="primary" class="body-1" @click="startGameClicked">START GAME</v-btn>
+
                 </v-card-text>
 
             </v-card>
@@ -55,8 +71,8 @@
 
             <v-card>
                 <v-card-text class="pt-6 display-4 text-center">
-                    GAME OVER
-                    <div class="caption">Restarting....</div>
+                    {{winningPlayerName}} WINS!
+                    <div class="caption">Get ready dual continues....</div>
                 </v-card-text>
             </v-card>
         </v-dialog>
@@ -93,8 +109,11 @@
                 clouds: [],
                 welcomeDialogModel: true,
                 gameOverDialogModel: false,
-                playerA: '',
-                playerB: ''
+                playerOne: '',
+                playerTwo: '',
+                rules: {
+                    required: value => !!value || 'Name is required.',
+                }
             };
         },
 
@@ -106,10 +125,26 @@
             planeTwoHealth() {
                 if (this.planeTwo) return this.planeTwo.health;
                 return null;
+            },
+            winningPlayerName() {
+                if (this.planeOne && this.planeOne.health <= 0) {
+                    return this.playerTwo;
+                }
+                if (this.planeTwo && this.planeTwo.health <= 0) {
+                    return this.playerOne;
+                }
+
+                return null;
             }
         },
 
         methods: {
+
+            startGameClicked() {
+                if (this.playerOne.length >= 1 && this.playerTwo.length >= 1) {
+                    this.createGame();
+                }
+            },
 
             createGame() {
 

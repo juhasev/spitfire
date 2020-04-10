@@ -55,7 +55,7 @@ export default class SmokeCloud {
     protected fadeCloud()
     {
         this.radius -= 1;
-        this.opacity -= 0.01;
+        this.opacity -= 0.02;
 
         if (this.opacity < 0) {
             this.visible = false;
