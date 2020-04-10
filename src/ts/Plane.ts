@@ -221,8 +221,6 @@ export default class Plane {
      */
     public draw() {
 
-        console.log(this.directionDegrees);
-
         if (this.keyLeftPressed) this.left();
         if (this.keyRightPressed) this.right();
         if (this.keyFirePressed) this.fire();
