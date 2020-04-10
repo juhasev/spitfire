@@ -71,7 +71,6 @@
     import Sky from "../ts/Sky.ts";
     import Plane from "../ts/Plane.ts";
     import HealthBar from "@/components/HealthBar";
-    import PointToLineDistanceCalculator from "@/ts/PointToLineDistanceCalculator";
 
     export default {
         name: "Spitfire",
@@ -108,24 +107,6 @@
                 if (this.planeTwo) return this.planeTwo.health;
                 return null;
             }
-        },
-
-        mounted() {
-
-            // Known point
-            const x1 = -6;
-            const y1 = 0;
-
-            // Second known point
-            const x2 = 6;
-            const y2 = 0;
-
-            const x = 2;
-            const y = 3;
-
-            const distance = new PointToLineDistanceCalculator(x,y,x1,y1,x2,y2).getDistance();
-
-            console.log(distance);
         },
 
         methods: {

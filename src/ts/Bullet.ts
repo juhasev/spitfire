@@ -12,6 +12,8 @@ export default class Bullet {
     private canvas: HTMLCanvasElement | null;
     private hitTarget: boolean;
 
+    private invisible: boolean;
+
     /**
      * Bullet constructor
      *
@@ -27,6 +29,7 @@ export default class Bullet {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
         this.hitTarget = false;
+
     }
 
     /**

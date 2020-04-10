@@ -2,6 +2,7 @@ import PlaneTypeInterface from "@/ts/Interfaces/PlaneTypeInterface";
 import PlaneSettingsInterface from "@/ts/Interfaces/PlaneSettingsInterface";
 import PositionCalculator from "@/ts/PositionCalculator";
 import Bullet from "@/ts/Bullet";
+import SmokeCloud from "@/ts/SmokeCloud";
 
 export default class Plane {
 
@@ -38,6 +39,7 @@ export default class Plane {
     private scale: number;
 
     private bullets: Array<Bullet>;
+    private smokeClouds: Array<SmokeCloud>;
     private canFire: boolean;
 
     private directionDegrees: number;
@@ -84,6 +86,7 @@ export default class Plane {
 
         this.health = settings.health;
         this.bullets = [];
+        this.smokeClouds = [];
 
         this.fallingOutOfSky = false;
         this.crashed = false;
@@ -198,10 +201,23 @@ export default class Plane {
      * Draw the place
      */
     public draw() {
+
         if (this.ctx !== null && this.canvas !== null) {
+
+            if (Math.random() < 0.7) {
+                const smokeIntensity = 100 - this.health;
+                if (smokeIntensity > 0) {
+                    this.smokeClouds.push(new SmokeCloud(this.canvas, this.x, this.y, 100 - this.health));
+                }
+            }
+
+            this.smokeClouds.forEach((smokeCloud) => {
+                smokeCloud.render();
+            });
 
             this.ctx.beginPath();
             this.ctx.setTransform(this.scale, 0, 0, this.scale, this.x, this.y); // sets scale and origin
+
             this.ctx.rotate(this.getImageRotation());
             this.ctx.drawImage(
                 this.image,
@@ -215,6 +231,11 @@ export default class Plane {
             bullet.render();
         });
 
+        // Remove smoke clouds that have faded
+        this.smokeClouds = this.smokeClouds.filter((smokeCloud) => {
+            return smokeCloud.isVisible();
+        });
+
         // Remove bullets no longer flying
         this.bullets = this.bullets.filter(bullet => {
             return bullet.isFlying();
@@ -226,6 +247,7 @@ export default class Plane {
 
         this.move();
         this.calculateVolume();
+
     }
 
     /**
