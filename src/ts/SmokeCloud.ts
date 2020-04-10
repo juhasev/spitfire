@@ -39,6 +39,11 @@ export default class SmokeCloud {
         setInterval(() => {
             this.fadeCloud();
         }, 75);
+
+        // No cloud lives longer than 4 seconds
+        setTimeout(() => {
+            this.visible = false;
+        }, 4000);
     }
 
     /**
