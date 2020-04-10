@@ -38,7 +38,7 @@ export default class SmokeCloud {
 
         setInterval(() => {
             this.fadeCloud();
-        }, 100);
+        }, 75);
     }
 
     /**
@@ -55,7 +55,7 @@ export default class SmokeCloud {
     protected fadeCloud()
     {
         this.radius -= 1;
-        this.opacity -= 0.02;
+        this.opacity -= 0.04;
 
         if (this.opacity < 0) {
             this.visible = false;
@@ -72,7 +72,7 @@ export default class SmokeCloud {
      * Render smoke cloud
      */
     public render() {
-        if (this.ctx !== null && this.canvas !== null) {
+        if (this.ctx !== null && this.canvas !== null && this.visible) {
 
             this.ctx!.setTransform(1, 0, 0, 1, 0, 0);
             this.ctx.beginPath();

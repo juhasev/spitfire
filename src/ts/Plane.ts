@@ -283,27 +283,25 @@ export default class Plane {
         // 360 heading right
 
         // Stall the plane quickly if heading up
-        if (this.directionDegrees > 180 && this.directionDegrees < 360) {
+        if (this.directionDegrees >= 180 && this.directionDegrees <= 360) {
 
             if (this.directionDegrees < 270) {
-                this.directionDegrees -= 1;
+                this.decrementDirection(3);
             }
 
-            if (this.directionDegrees > 270) {
-                this.directionDegrees += 1;
+            if (this.directionDegrees >= 270) {
+                this.incrementDirection(3);
             }
-
-            this.speed = this.speed - 0.1;
         }
 
         if (this.directionDegrees !== 90) {
             if (this.directionDegrees < 90) {
-                this.directionDegrees += 1;
+                this.incrementDirection(1);
                 this.speed = this.speed + 0.1;
             }
 
             if (this.directionDegrees > 90) {
-                this.directionDegrees -= 1;
+                this.decrementDirection(1);
                 this.speed = this.speed + 0.1;
             }
         }
@@ -330,10 +328,10 @@ export default class Plane {
     /**
      * Get rotation angle
      */
-    public getDirection()
-    {
+    public getDirection() {
         return this.directionDegrees;
     }
+
     /**
      * Move the plane
      */
@@ -452,5 +450,21 @@ export default class Plane {
         if (event.key === this.keyLeft) this.keyLeftPressed = pressed;
         if (event.key === this.keyRight) this.keyRightPressed = pressed;
         if (event.key === this.keyFire) this.keyFirePressed = pressed;
+    }
+
+    protected incrementDirection(increment: number) {
+        this.directionDegrees += increment;
+
+        if (this.directionDegrees > 360) {
+            this.directionDegrees -= 360;
+        }
+    }
+
+    protected decrementDirection(decrement: number) {
+        this.directionDegrees -= decrement;
+
+        if (this.directionDegrees < 0) {
+            this.directionDegrees = 360 + this.directionDegrees;
+        }
     }
 }

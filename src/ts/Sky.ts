@@ -61,12 +61,9 @@ export default class Sky {
         this.planes.forEach((plane: Plane) => {
 
             if (plane.hasCrashed()) {
+                plane.toggleSounds(false);
                 if (this.gameOverHandler) this.gameOverHandler();
                 this.gameOver = true;
-            }
-
-            if (this.gameOver) {
-                plane.toggleSounds(false);
             }
 
             if (!this.gameOver) {
