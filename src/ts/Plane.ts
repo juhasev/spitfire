@@ -358,7 +358,6 @@ export default class Plane {
             if (this.audio.playbackRate < 2) {
                 this.audio.playbackRate += 0.1;
             }
-            return;
         }
 
         // Right boundary
@@ -373,16 +372,18 @@ export default class Plane {
             this.restartAudio();
         }
 
-        // Going down
-        if (this.y > this.canvas!.height + this.height / 2) {
-            this.y = -this.height / 2;
-            this.restartAudio();
-        }
+        if (!this.fallingOutOfSky) {
+            // Going down
+            if (this.y > this.canvas!.height + this.height / 2) {
+                this.y = -this.height / 2;
+                this.restartAudio();
+            }
 
-        // Going up
-        if (this.y < -this.height / 2) {
-            this.y = this.canvas!.height + this.height / 2;
-            this.restartAudio();
+            // Going up
+            if (this.y < -this.height / 2) {
+                this.y = this.canvas!.height + this.height / 2;
+                this.restartAudio();
+            }
         }
     }
 
