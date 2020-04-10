@@ -2,22 +2,25 @@
 
 # Spitfire
 A simple two player 2nd World War dogfight game. This game uses HTML 5 Canvas element for the game graphics.
-UI is implemented using Vue / Vuetify. Please note that this game is not completed!
+UI is implemented using Vue / Vuetify. Game features:
 
-Missing features:
-- Smoke trail when damaged
+1) Location sensitive damage from 1 to 40 per hit
+2) Smoke trails from damaged planes
 
 ## Controls
 Player 1
-> Left and right arrows
+> Left and right arrows + shoot up arrow
 
 Player 2
-> Key A (left) and D (right)
+> Key A (left) and D (right) + shoot W key
 
 ## Tools setup
-Open terminal window
+Open terminal window to install Brew package manager
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+```
+Next install git and npm
+```bash
 brew install git npm
 ```
 
