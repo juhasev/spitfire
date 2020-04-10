@@ -47,6 +47,14 @@ export default class Plane {
     private ctx: CanvasRenderingContext2D | null;
     private canvas: HTMLCanvasElement | null;
 
+    private keyLeft: string;
+    private keyRight: string;
+    private keyFire: string;
+
+    private keyLeftPressed: boolean;
+    private keyRightPressed: boolean;
+    private keyFirePressed: boolean;
+
     /**
      * Plane constructor
      *
@@ -81,6 +89,14 @@ export default class Plane {
         this.gunAudio = new Audio('./gun_fire.wav');
         this.gunAudio.volume = 0.2;
 
+        this.keyLeft = settings.keyLeft;
+        this.keyRight = settings.keyRight;
+        this.keyFire = settings.keyFire;
+
+        this.keyLeftPressed = false;
+        this.keyRightPressed = false;
+        this.keyFirePressed = false;
+
         this.ctx = null;
         this.canvas = null;
 
@@ -92,6 +108,9 @@ export default class Plane {
         this.crashed = false;
 
         this.canFire = true;
+
+        window.addEventListener('keydown', this.keyDown.bind(this));
+        window.addEventListener('keyup', this.keyUp.bind(this));
     }
 
     /**
@@ -155,7 +174,7 @@ export default class Plane {
             this.directionDegrees = 0;
         }
 
-        this.directionDegrees += 3;
+        this.directionDegrees += 2;
     }
 
     /**
@@ -168,7 +187,7 @@ export default class Plane {
         if (this.directionDegrees === 0) {
             this.directionDegrees = 360;
         }
-        this.directionDegrees -= 3;
+        this.directionDegrees -= 2;
     }
 
     public addDamage(damage: number) {
@@ -201,6 +220,10 @@ export default class Plane {
      * Draw the place
      */
     public draw() {
+
+        if (this.keyLeftPressed) this.left();
+        if (this.keyRightPressed) this.right();
+        if (this.keyFirePressed) this.fire();
 
         if (this.ctx !== null && this.canvas !== null) {
 
@@ -383,5 +406,33 @@ export default class Plane {
      */
     protected getImageRotation() {
         return ((this.directionDegrees + Plane.IMAGE_ROTATION_DEGREES) * Math.PI) / 180;
+    }
+
+    /**
+     * Key down event
+     * @param event
+     */
+    protected keyDown(event: KeyboardEvent) {
+        this.handleKeys(event, true);
+    }
+
+    /**
+     * Key up event
+     * @param event
+     */
+    protected keyUp(event: KeyboardEvent) {
+        this.handleKeys(event, false);
+    }
+
+    /**
+     * Mark keys pressed
+     *
+     * @param event
+     * @param pressed
+     */
+    protected handleKeys(event: KeyboardEvent, pressed: boolean) {
+        if (event.key === this.keyLeft) this.keyLeftPressed = pressed;
+        if (event.key === this.keyRight) this.keyRightPressed = pressed;
+        if (event.key === this.keyFire) this.keyFirePressed = pressed;
     }
 }

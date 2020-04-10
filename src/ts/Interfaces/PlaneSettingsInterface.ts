@@ -8,4 +8,7 @@ export default interface PlaneSettingsInterface {
     scale: number,
     x: number,
     y: number,
+    keyFire: string,
+    keyLeft: string,
+    keyRight: string
 }

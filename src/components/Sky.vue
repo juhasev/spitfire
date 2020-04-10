@@ -1,37 +1,23 @@
 <template>
     <div>
-        <keypress v-if="!welcomeDialogModel" :key-code="37" event="keydown" @pressed="planeOne.left()"/>
-        <keypress v-if="!welcomeDialogModel" :key-code="39" event="keydown" @pressed="planeOne.right()"/>
-        <keypress v-if="!welcomeDialogModel" :key-code="38" event="keydown" @pressed="planeOne.fire()"/>
-
-        <keypress v-if="!welcomeDialogModel" :key-code="65" event="keydown" @pressed="planeTwo.left()"/>
-        <keypress v-if="!welcomeDialogModel" :key-code="68" event="keydown" @pressed="planeTwo.right()"/>
-        <keypress v-if="!welcomeDialogModel" :key-code="87" event="keydown" @pressed="planeTwo.fire()"/>
-
         <keypress :key-code="32" event="keydown" @pressed="startGame"/>
 
         <div class="controlBar">
             <v-container fluid class="pa-0">
                 <v-row dense>
-                    <v-col>
-
-                    </v-col>
+                    <v-col cols="1"></v-col>
                     <v-col cols="4">
                         <health-bar v-if="planeOneHealth!==null && planeOneHealth>=0"
                                     :value="planeOneHealth"
                                     :name="playerOne"></health-bar>
                     </v-col>
-                    <v-col cols="2" class="text-center">
-
-                    </v-col>
+                    <v-col cols="2"></v-col>
                     <v-col cols="4">
                         <health-bar v-if="planeTwoHealth!==null && planeTwoHealth>=0"
                                     :value="planeTwoHealth"
                                     :name="playerTwo"></health-bar>
                     </v-col>
-                    <v-col>
-
-                    </v-col>
+                    <v-col cols="1"></v-col>
                 </v-row>
             </v-container>
         </div>
@@ -104,13 +90,22 @@
             return {
                 sky: null,
                 sounds: true,
+                listenKeys: [
+                    'ArrowRight',
+                    'ArrowLeft',
+                    'ArrowUp',
+                    'a',
+                    'd',
+                    'w'
+                ],
+                keysPressed: [],
                 planeOne: null,
                 planeTwo: null,
                 clouds: [],
                 welcomeDialogModel: true,
                 gameOverDialogModel: false,
-                playerOne: '',
-                playerTwo: '',
+                playerOne: 'Player One',
+                playerTwo: 'Player Two',
                 rules: {
                     required: value => !!value || 'Name is required.',
                 }
@@ -162,7 +157,10 @@
                     height: 100,
                     scale: 0.25,
                     x: 0,
-                    y: this.$refs.sky.height / 2 + 50
+                    y: this.$refs.sky.height / 2 + 50,
+                    keyFire: 'ArrowUp',
+                    keyLeft: 'ArrowLeft',
+                    keyRight: 'ArrowRight'
                 });
 
                 this.planeTwo = new Plane('mustang', {
@@ -173,7 +171,10 @@
                     height: 100,
                     scale: 0.25,
                     x: this.$refs.sky.width,
-                    y: this.$refs.sky.height / 3 + 50
+                    y: this.$refs.sky.height / 3 + 50,
+                    keyFire: 'a',
+                    keyLeft: 'd',
+                    keyRight: 'w'
                 });
 
                 this.planeOne.toggleSounds(this.sounds);
@@ -182,10 +183,6 @@
                 this.sky.addPlane(this.planeOne);
                 this.sky.addPlane(this.planeTwo);
                 this.sky.animate();
-            },
-
-            settingsClicked() {
-                this.settingsModel = true;
             },
 
             soundsToggled() {
