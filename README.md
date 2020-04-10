@@ -24,9 +24,14 @@ Open terminal window to install Brew package manager
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 ```
-Next install git and npm
+Next install GIT version control system
 ```bash
-brew install git npm
+brew install git
+```
+
+Install Node Package Manager or NPM
+```bash
+brew install npm
 ```
 
 ## Project setup
@@ -36,9 +41,13 @@ Clone project on the local machine:
 git clone https://github.com/juhasev/spitfire.git
 ```
 
-Next install Node dependencies
+Install Node dependencies
 ```
 npm install
+```
+
+Run your local game server
+```bash
 npm run serve
 ```
 
