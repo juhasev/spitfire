@@ -6,10 +6,10 @@ UI is implemented using Vue / Vuetify. Before you get into playing here are some
 
 1) Damage varies from 1 to 40 per hit depending on how close to the center of fuselage you hit
 2) If you go up in an extreme angle your plane will slow down
-3) If you do down your plane's speed will increase
-4) Damage will also decrease your plane speed
+3) If you do down in an extreme angle your plane's speed will increase
+4) Damage will decrease your plane's speed
 5) Planes emit smoke based on their damage level
-6) Clouds start getting ticker at the beginning of the game (hint: hide)
+6) Clouds start getting ticker at the beginning of the game (hint: hide) and cycle back and forth after that
 7) Firing when only needed can make you more accurate
 
 ## Controls
