@@ -12,9 +12,9 @@ export default class Plane {
     static IMAGE_ROTATION_DEGREES: number = 90;
 
     public static planeTypes: Array<PlaneTypeInterface> = [
-        {name: "mustang", image: '/plane.png', audio: "spitfire.mp3"},
-        {name: "spitfire", image: '/spitfire.png', audio: "spitfire2.mp3"},
-        {name: "junker", image: '/junker.png', audio: "spitfire2.mp3"},
+        {name: "mustang", image: 'plane.png', audio: "spitfire.mp3"},
+        {name: "spitfire", image: 'spitfire.png', audio: "spitfire2.mp3"},
+        {name: "junker", image: 'junker.png', audio: "spitfire2.mp3"},
     ];
 
     public name: string;
