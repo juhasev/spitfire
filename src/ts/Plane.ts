@@ -290,11 +290,11 @@ export default class Plane {
         if (this.directionDegrees >= 180 && this.directionDegrees <= 360) {
 
             if (this.directionDegrees < 270) {
-                this.decrementDirection(3);
+                this.decrementDirection(2);
             }
 
             if (this.directionDegrees >= 270) {
-                this.incrementDirection(3);
+                this.incrementDirection(2);
             }
         }
 
