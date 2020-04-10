@@ -55,4 +55,8 @@ Click the link below to start the game in the browser
 
 [http://localhost:8080](http://localhost:8080/)
 
+## Game play
 ![Spitfire](./public/gameplay.png)
+
+
+![Spitfire](./public/gameplay2.png)
