@@ -12,8 +12,6 @@ export default class Bullet {
     private canvas: HTMLCanvasElement | null;
     private hitTarget: boolean;
 
-    private invisible: boolean;
-
     /**
      * Bullet constructor
      *
