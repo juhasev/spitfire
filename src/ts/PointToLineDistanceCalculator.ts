@@ -2,6 +2,17 @@ export default class PointToLineDistanceCalculator {
 
     protected distance: number;
 
+    /**
+     * Calculates given x,y point distance (plane) to a given line (bullet firing path)
+     * This is used to determine damage to the plane
+     *
+     * @param x
+     * @param y
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     */
     constructor(x: number, y: number, x1: number, y1: number, x2: number, y2: number) {
 
         let A = x - x1;
