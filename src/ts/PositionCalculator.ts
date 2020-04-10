@@ -16,8 +16,8 @@ export default class PositionCalculator {
     constructor(currentX:number, currentY:number, speed:number, rotation:number) {
 
         let radians = this.toRadians(rotation);
-        let xDistance = Math.round(Math.cos(radians) * speed);
-        let yDistance = Math.round(Math.sin(radians) * speed);
+        let xDistance = Math.cos(radians) * speed;
+        let yDistance = Math.sin(radians) * speed;
 
         this.currentX = currentX;
         this.currentY = currentY;

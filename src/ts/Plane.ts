@@ -174,7 +174,7 @@ export default class Plane {
             this.directionDegrees = 0;
         }
 
-        this.directionDegrees += 2;
+        this.directionDegrees += 1;
     }
 
     /**
@@ -187,7 +187,7 @@ export default class Plane {
         if (this.directionDegrees === 0) {
             this.directionDegrees = 360;
         }
-        this.directionDegrees -= 2;
+        this.directionDegrees -= 1;
     }
 
     public addDamage(damage: number) {
