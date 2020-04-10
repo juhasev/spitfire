@@ -141,7 +141,7 @@
                 this.sky.gameOverHandler = this.gameOver;
 
                 this.planeOne = new Plane('spitfire', {
-                    speed: 5,
+                    speed: 7,
                     health: 100,
                     directionDegrees: 0,
                     width: 100,
@@ -155,7 +155,7 @@
                 });
 
                 this.planeTwo = new Plane('mustang', {
-                    speed: 5,
+                    speed: 7,
                     health: 100,
                     directionDegrees: 180,
                     width: 100,

@@ -206,6 +206,10 @@ export default class Plane {
             this.audio.pause();
             this.crashAudio.play();
         }
+
+        // Slow down damaged planes
+        if (this.health < 50) this.speed -= 1;
+        if (this.health < 20) this.speed -= 1;
     }
 
     public getBullets() {
