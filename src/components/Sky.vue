@@ -90,15 +90,6 @@
             return {
                 sky: null,
                 sounds: true,
-                listenKeys: [
-                    'ArrowRight',
-                    'ArrowLeft',
-                    'ArrowUp',
-                    'a',
-                    'd',
-                    'w'
-                ],
-                keysPressed: [],
                 planeOne: null,
                 planeTwo: null,
                 clouds: [],
@@ -172,9 +163,9 @@
                     scale: 0.25,
                     x: this.$refs.sky.width,
                     y: this.$refs.sky.height / 3 + 50,
-                    keyFire: 'a',
-                    keyLeft: 'd',
-                    keyRight: 'w'
+                    keyFire: 'w',
+                    keyLeft: 'a',
+                    keyRight: 'd'
                 });
 
                 this.planeOne.toggleSounds(this.sounds);
