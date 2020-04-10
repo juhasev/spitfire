@@ -221,6 +221,8 @@ export default class Plane {
      */
     public draw() {
 
+        console.log(this.directionDegrees);
+
         if (this.keyLeftPressed) this.left();
         if (this.keyRightPressed) this.right();
         if (this.keyFirePressed) this.fire();
@@ -277,6 +279,24 @@ export default class Plane {
      * Handle falling out of sky
      */
     protected fallOutOfSky() {
+
+        // 180 heading left
+        // 270 heading straight up
+        // 360 heading right
+
+        // Stall the plane quickly if heading up
+        if (this.directionDegrees > 180 && this.directionDegrees < 360) {
+
+            if (this.directionDegrees < 270) {
+                this.directionDegrees -= 1;
+            }
+
+            if (this.directionDegrees > 270) {
+                this.directionDegrees += 1;
+            }
+
+            this.speed = this.speed - 0.1;
+        }
 
         if (this.directionDegrees !== 90) {
             if (this.directionDegrees < 90) {
