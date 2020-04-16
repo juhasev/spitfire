@@ -12,6 +12,11 @@ UI is implemented using Vue / Vuetify. Before you get into playing here are some
 6) Clouds start getting ticker at the beginning of the game (hint: hide) and cycle back and forth after that
 7) Firing only when needed can make you more accurate
 
+## Demo
+This game is designed for desktop computers only. Here is a demo. Enjoy!
+
+[http://www.spitfire-game.com](http://www.spitfire-game.com)
+
 ## Controls
 Player 1
 > Left and right arrows + shoot up arrow

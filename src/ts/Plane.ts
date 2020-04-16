@@ -55,6 +55,8 @@ export default class Plane {
     private keyRightPressed: boolean;
     private keyFirePressed: boolean;
 
+    private settings: PlaneSettingsInterface;
+
     /**
      * Plane constructor
      *
@@ -67,6 +69,7 @@ export default class Plane {
             return planeType.name === type;
         });
 
+        this.settings = settings;
         this.name = specs!.name;
 
         this.image = new Image(); // Using optional size for image
@@ -152,7 +155,7 @@ export default class Plane {
 
             setTimeout(() => {
                 this.canFire = true;
-            }, 500);
+            }, 375);
 
             this.gunAudio.currentTime = 0;
             this.gunAudio.play();
@@ -169,7 +172,7 @@ export default class Plane {
     public right() {
 
         if (this.fallingOutOfSky) return;
-        this.incrementDirection(1);
+        this.incrementDirection(2);
     }
 
     /**
@@ -177,7 +180,7 @@ export default class Plane {
      */
     public left() {
         if (this.fallingOutOfSky) return;
-        this.decrementDirection(1);
+        this.decrementDirection(2);
     }
 
     /**
@@ -203,8 +206,8 @@ export default class Plane {
         }
 
         // Slow down damaged planes
-        if (this.health < 50) this.speed -= 1;
-        if (this.health < 20) this.speed -= 1;
+        if (this.settings.speed >= this.percentOfSpeed(50) && this.health < 50) this.settings.speed -= this.percentOfSpeed(20);
+        if (this.settings.speed >= this.percentOfSpeed(20) && this.health < 20) this.settings.speed -= this.percentOfSpeed(20);
     }
 
     /**
@@ -222,29 +225,37 @@ export default class Plane {
     }
 
     /**
+     * Calculate percent of speed
+     * @param percent
+     */
+    protected percentOfSpeed(percent: number) {
+        return this.settings.speed * percent / 100;
+    }
+
+    /**
      * Adjust speed
      */
     protected adjustSpeedBasedOnDirection() {
 
         // Plane heading sharply up take down the speed
-        if (this.speed >= 3 && this.directionDegrees >= 225 && this.directionDegrees <= 325) {
+        if (this.speed >= (this.settings.speed - this.settings.speed * .5) && this.directionDegrees >= 225 && this.directionDegrees <= 325) {
             this.speed -=0.005;
             return;
         }
 
         // Plane heading sharply down increase the speed
-        if (this.speed <= 10 && this.directionDegrees >= 45 && this.directionDegrees <= 135) {
+        if (this.speed <= (this.settings.speed + this.settings.speed * .5) && this.directionDegrees >= 45 && this.directionDegrees <= 135) {
             this.speed +=0.01;
             return;
         }
 
         // Return speed back to normal when out of extreme angles
-        if (this.speed > 7) {
+        if (this.speed > this.settings.speed) {
             this.speed -=0.005;
             return;
         }
 
-        if (this.speed < 7) {
+        if (this.speed < this.settings.speed) {
             this.speed +=0.005;
             return;
         }
