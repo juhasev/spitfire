@@ -203,8 +203,8 @@ export default class Plane {
         }
 
         // Slow down damaged planes
-        if (this.health < 50) this.speed -= 1;
-        if (this.health < 20) this.speed -= 1;
+        if (this.health < 50) this.speed -= 0.25;
+        if (this.health < 20) this.speed -= 0.25;
     }
 
     /**
