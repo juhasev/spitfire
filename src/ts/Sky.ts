@@ -4,8 +4,11 @@ import Bullet from "@/ts/Bullet";
 import DistanceCalculator from "@/ts/DistanceCalculator";
 import PointToLineDistanceCalculator from "@/ts/PointToLineDistanceCalculator";
 import PositionCalculator from "@/ts/PositionCalculator";
+import {Socket} from "socket.io";
 
 export default class Sky {
+
+    public gameOverHandler: () => void;
 
     private readonly canvas: HTMLCanvasElement;
     private readonly ctx: CanvasRenderingContext2D | null;
@@ -13,17 +16,20 @@ export default class Sky {
     private cloudsGrowing: boolean;
     private planes: Array<Plane>;
     private gameOver: boolean;
-    public gameOverHandler: () => void;
+    private socket: Socket;
 
     /**
      * Sky constructor
      *
      * @param canvas
      */
-    constructor(canvas: HTMLCanvasElement) {
+    constructor(canvas: HTMLCanvasElement, socket: Socket) {
 
         this.ctx = canvas.getContext("2d");
         this.canvas = canvas;
+
+        this.socket = socket;
+
         this.clouds = [];
         this.planes = [];
         this.cloudsGrowing = true;

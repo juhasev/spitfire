@@ -152,7 +152,7 @@ export default class Plane {
 
             setTimeout(() => {
                 this.canFire = true;
-            }, 500);
+            }, 375);
 
             this.gunAudio.currentTime = 0;
             this.gunAudio.play();
@@ -169,7 +169,7 @@ export default class Plane {
     public right() {
 
         if (this.fallingOutOfSky) return;
-        this.incrementDirection(1);
+        this.incrementDirection(2);
     }
 
     /**
@@ -177,7 +177,7 @@ export default class Plane {
      */
     public left() {
         if (this.fallingOutOfSky) return;
-        this.decrementDirection(1);
+        this.decrementDirection(2);
     }
 
     /**
