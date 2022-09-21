@@ -17,7 +17,7 @@
     "vue": "^2.6.11",
     "vue-keypress": "^1.4.0",
     "vue-socket.io": "^3.0.7",
-    "vuetify": "^2.2.11"
+    "vuetify": "^2.6.10"
   },
   "devDependencies": {
     "@types/express": "^4.17.6",
