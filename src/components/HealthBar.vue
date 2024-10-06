@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex">
+    <div class="d-flex mt-2">
 
         <div class="title grey--text text-darken-4 pl-2 pr-2 text-no-wrap">
             {{name.toUpperCase()}}
