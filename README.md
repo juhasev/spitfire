@@ -13,9 +13,7 @@ UI is implemented using Vue / Vuetify. Before you get into playing here are some
 7) Firing only when needed can make you more accurate
 
 ## Demo
-This game is designed for desktop computers only. Here is a demo. Enjoy!
-
-[http://www.spitfire-game.com](http://www.spitfire-game.com)
+This game is designed for desktop computers only. 
 
 ## Controls
 Player 1
