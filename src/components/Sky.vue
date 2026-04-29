@@ -10,12 +10,20 @@
                         <health-bar v-if="planeOneHealth!==null && planeOneHealth>=0"
                                     :value="planeOneHealth"
                                     :name="playerOne"></health-bar>
+                        <div v-if="planeOneMissiles!==null" class="missileCount">
+                            <v-icon small color="red darken-2">mdi-rocket-launch</v-icon>
+                            <span class="ml-1">Missiles: {{ planeOneMissiles }}</span>
+                        </div>
                     </v-col>
                     <v-col cols="2"></v-col>
                     <v-col cols="4">
                         <health-bar v-if="planeTwoHealth!==null && planeTwoHealth>=0"
                                     :value="planeTwoHealth"
                                     :name="playerTwo"></health-bar>
+                        <div v-if="planeTwoMissiles!==null" class="missileCount">
+                            <v-icon small color="red darken-2">mdi-rocket-launch</v-icon>
+                            <span class="ml-1">Missiles: {{ planeTwoMissiles }}</span>
+                        </div>
                     </v-col>
                     <v-col cols="1"></v-col>
                 </v-row>
@@ -86,6 +94,7 @@
                                         <code class="mr-2">&#x2190; Left</code>
                                         <code class="mr-2">&#x2192; Right</code>
                                         <code class="mr-2">&#x2191; Shoot</code>
+                                        <code class="mr-2">Right Shift Missile</code>
                                     </v-col>
 
                                     <v-col cols="6">
@@ -102,6 +111,7 @@
                                         <code class="mr-2">A Left</code>
                                         <code class="mr-2">D Right</code>
                                         <code class="mr-2">W Shoot</code>
+                                        <code class="mr-2">Left Shift Missile</code>
                                     </v-col>
 
                                 </v-row>
@@ -165,6 +175,10 @@
                         </li>
                         <li>Firing only when needed can make you more accurate</li>
                         <li>Pro players don't turn around but instead re-appear on the opposite side by going through the boundaries</li>
+                        <li>Collect glowing missile pickups that appear randomly across the sky</li>
+                        <li>Tap <strong>Right Shift</strong> (Player 1) or <strong>Left Shift</strong> (Player 2) to launch a missile instantly &mdash; one per shot, drains your missile inventory</li>
+                        <li>Missiles deal up to 80 damage with a small splash radius &mdash; hard to dodge once locked in</li>
+                        <li>Missiles are heat-seeking and home in on the opponent, but turn at only half the rate your plane does &mdash; tight turns can shake them off</li>
                     </ul>
                     <v-btn color="primary" small class="mt-4" @click="tipsDialogModel=false">GOT IT</v-btn>
                 </v-card-text>
@@ -243,6 +257,14 @@
                 if (this.planeTwo) return this.planeTwo.health;
                 return null;
             },
+            planeOneMissiles() {
+                if (this.planeOne) return this.planeOne.getMissileCount();
+                return null;
+            },
+            planeTwoMissiles() {
+                if (this.planeTwo) return this.planeTwo.getMissileCount();
+                return null;
+            },
             winningPlayerName() {
                 if (this.planeOne && this.planeOne.health <= 0) {
                     return this.playerTwo;
@@ -296,7 +318,8 @@
                     y: this.$refs.sky.height / 2 + 50,
                     keyFire: 'ArrowUp',
                     keyLeft: 'ArrowLeft',
-                    keyRight: 'ArrowRight'
+                    keyRight: 'ArrowRight',
+                    keyMissile: 'ShiftRight'
                 });
 
                 this.planeTwo = new Plane('mustang', {
@@ -310,7 +333,8 @@
                     y: this.$refs.sky.height / 3 + 50,
                     keyFire: 'w',
                     keyLeft: 'a',
-                    keyRight: 'd'
+                    keyRight: 'd',
+                    keyMissile: 'ShiftLeft'
                 });
 
                 this.planeOne.toggleSounds(this.sounds);
@@ -350,6 +374,14 @@
         position: fixed;
         top: 0;
         width: 100%;
+    }
+
+    .missileCount {
+        font-size: 13px;
+        color: #212121;
+        padding: 0 14px;
+        margin-top: -4px;
+        font-weight: 500;
     }
 
     .sky {

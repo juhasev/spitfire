@@ -10,5 +10,11 @@ export default interface PlaneSettingsInterface {
     y: number,
     keyFire: string,
     keyLeft: string,
-    keyRight: string
+    keyRight: string,
+    /**
+     * Key that launches a missile. Matched against either KeyboardEvent.key
+     * or KeyboardEvent.code, so values like "ShiftLeft"/"ShiftRight" can
+     * distinguish the two physical Shift keys.
+     */
+    keyMissile: string
 }

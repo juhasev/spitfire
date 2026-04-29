@@ -1,6 +1,9 @@
 import CloudInterface from "@/ts/Interfaces/CloudInterface";
 import Plane from "@/ts/Plane";
 import Bullet from "@/ts/Bullet";
+import Missile from "@/ts/Missile";
+import MissilePickup from "@/ts/MissilePickup";
+import Explosion from "@/ts/Explosion";
 import DistanceCalculator from "@/ts/DistanceCalculator";
 import PointToLineDistanceCalculator from "@/ts/PointToLineDistanceCalculator";
 import PositionCalculator from "@/ts/PositionCalculator";
@@ -10,6 +13,12 @@ export default class Sky {
 
     public gameOverHandler: () => void;
 
+    /**
+     * Min/max delay (ms) between random missile pickup spawns
+     */
+    static PICKUP_MIN_DELAY = 6000;
+    static PICKUP_MAX_DELAY = 14000;
+
     private readonly canvas: HTMLCanvasElement;
     private readonly ctx: CanvasRenderingContext2D | null;
     private clouds: Array<CloudInterface>;
@@ -17,6 +26,9 @@ export default class Sky {
     private planes: Array<Plane>;
     private gameOver: boolean;
     private socket: Socket;
+    private missilePickups: Array<MissilePickup>;
+    private nextPickupAt: number;
+    private explosions: Array<Explosion>;
 
     /**
      * Sky constructor
@@ -38,6 +50,9 @@ export default class Sky {
         this.gameOver = false;
         this.gameOverHandler = () => {
         };
+        this.missilePickups = [];
+        this.nextPickupAt = Date.now() + this.randomPickupDelay();
+        this.explosions = [];
         this.designClouds();
 
         console.log("SKY INITIALIZED");
@@ -50,7 +65,13 @@ export default class Sky {
      */
     public addPlane(plane: Plane) {
         plane.setCanvas(this.canvas);
-        this.planes.push(plane)
+        this.planes.push(plane);
+
+        // Refresh each plane's enemy list so missiles fired by any plane
+        // know who to home in on.
+        this.planes.forEach((p) => {
+            p.setEnemies(this.planes.filter((other) => other !== p));
+        });
     }
 
     /**
@@ -63,6 +84,10 @@ export default class Sky {
         if (this.gameOver) return;
 
         this.clearSky();
+
+        // Maybe spawn a missile pickup, then render existing ones (under planes/clouds)
+        this.maybeSpawnMissilePickup();
+        this.renderMissilePickups();
 
         this.planes.forEach((plane: Plane) => {
 
@@ -80,12 +105,111 @@ export default class Sky {
                 enemyBullets.forEach((bullet: Bullet) => {
                     this.detectBulletCollision(plane, bullet);
                 });
+
+                let enemyMissiles = this.getEnemyMissiles(plane.name);
+
+                enemyMissiles.forEach((missile: Missile) => {
+                    this.detectMissileCollision(plane, missile);
+                });
+
+                // Plane collects any pickup it touches
+                this.detectMissilePickupCollection(plane);
             }
         });
+
+        // Drop pickups that were collected or expired
+        this.missilePickups = this.missilePickups.filter(p => p.isActive());
+
+        // Render explosions on top of planes/projectiles, then prune the dead ones
+        this.explosions.forEach(e => e.render());
+        this.explosions = this.explosions.filter(e => e.isVisible());
 
         this.drawClouds();
 
         requestAnimationFrame(this.animate.bind(this));
+    }
+
+    /**
+     * Random delay before next pickup spawn
+     */
+    protected randomPickupDelay() {
+        return Sky.PICKUP_MIN_DELAY + Math.random() * (Sky.PICKUP_MAX_DELAY - Sky.PICKUP_MIN_DELAY);
+    }
+
+    /**
+     * Spawn a new missile pickup if it's time
+     */
+    protected maybeSpawnMissilePickup() {
+        if (Date.now() < this.nextPickupAt) return;
+
+        // Cap concurrent pickups so the screen doesn't get cluttered
+        if (this.missilePickups.length >= 3) {
+            this.nextPickupAt = Date.now() + this.randomPickupDelay();
+            return;
+        }
+
+        const margin = 60;
+        const x = margin + Math.random() * (this.canvas.width - margin * 2);
+        const y = margin + Math.random() * (this.canvas.height - margin * 2);
+        this.missilePickups.push(new MissilePickup(this.canvas, x, y));
+        this.nextPickupAt = Date.now() + this.randomPickupDelay();
+    }
+
+    /**
+     * Render all active missile pickups
+     */
+    protected renderMissilePickups() {
+        this.missilePickups.forEach(p => p.render());
+    }
+
+    /**
+     * Detect plane touching a missile pickup and award a missile
+     */
+    protected detectMissilePickupCollection(plane: Plane) {
+        this.missilePickups.forEach((pickup: MissilePickup) => {
+            if (!pickup.isActive()) return;
+            const distance = new DistanceCalculator(plane.getX(), plane.getY(), pickup.getX(), pickup.getY()).getDistance();
+            if (distance < pickup.getRadius() + 25) {
+                pickup.collect();
+                plane.collectMissile();
+            }
+        });
+    }
+
+    /**
+     * Get missiles fired by enemy planes (anyone other than `name`)
+     */
+    protected getEnemyMissiles(name: string) {
+        let missiles: Array<Missile> = [];
+
+        this.planes.forEach((planeOther: Plane) => {
+            if (planeOther.name !== name) {
+                missiles = [...missiles, ...planeOther.getMissiles()];
+            }
+        });
+
+        return missiles;
+    }
+
+    /**
+     * Detect missile hitting a plane. Missiles do area damage based on
+     * how close the plane is to the missile center.
+     */
+    protected detectMissileCollision(plane: Plane, missile: Missile) {
+        const distance = new DistanceCalculator(plane.getX(), plane.getY(), missile.getX(), missile.getY()).getDistance();
+        if (distance >= Missile.MISSILE_DAMAGE_RADIUS) return;
+
+        // Damage scales from 80 (direct hit) to ~30 at the edge of the radius
+        const damage = Math.round(80 - (distance / Missile.MISSILE_DAMAGE_RADIUS) * 50);
+        plane.addDamage(damage);
+        missile.hit();
+
+        // Spawn an explosion animation centered on the missile impact point.
+        // Direct hits get a slightly bigger blast.
+        const intensity = 0.85 + (1 - distance / Missile.MISSILE_DAMAGE_RADIUS) * 0.5;
+        this.explosions.push(new Explosion(this.canvas, missile.getX(), missile.getY(), intensity));
+
+        console.log("Missile damage (" + damage + ") to plane " + plane.name);
     }
 
     /**

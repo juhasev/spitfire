@@ -2,6 +2,8 @@ import PlaneTypeInterface from "@/ts/Interfaces/PlaneTypeInterface";
 import PlaneSettingsInterface from "@/ts/Interfaces/PlaneSettingsInterface";
 import PositionCalculator from "@/ts/PositionCalculator";
 import Bullet from "@/ts/Bullet";
+import Missile from "@/ts/Missile";
+import MissileSound from "@/ts/MissileSound";
 import SmokeCloud from "@/ts/SmokeCloud";
 
 export default class Plane {
@@ -31,6 +33,7 @@ export default class Plane {
     private crashAudio: HTMLAudioElement;
     private hitAudio: HTMLAudioElement;
     private gunAudio: HTMLAudioElement;
+    private missileSound: MissileSound;
 
     private image: HTMLImageElement;
 
@@ -39,8 +42,12 @@ export default class Plane {
     private scale: number;
 
     private bullets: Array<Bullet>;
+    private missiles: Array<Missile>;
+    private missileInventory: number;
     private smokeClouds: Array<SmokeCloud>;
     private canFire: boolean;
+    private canFireMissile: boolean;
+    private enemies: Array<Plane>;
 
     private directionDegrees: number;
 
@@ -50,10 +57,12 @@ export default class Plane {
     private keyLeft: string;
     private keyRight: string;
     private keyFire: string;
+    private keyMissile: string;
 
     private keyLeftPressed: boolean;
     private keyRightPressed: boolean;
     private keyFirePressed: boolean;
+    private keyMissilePressed: boolean;
 
     private settings: PlaneSettingsInterface;
 
@@ -91,26 +100,33 @@ export default class Plane {
         this.hitAudio.volume = 0.3;
         this.gunAudio = new Audio('gun_fire.wav');
         this.gunAudio.volume = 0.2;
+        this.missileSound = new MissileSound(0.45);
 
         this.keyLeft = settings.keyLeft;
         this.keyRight = settings.keyRight;
         this.keyFire = settings.keyFire;
+        this.keyMissile = settings.keyMissile;
 
         this.keyLeftPressed = false;
         this.keyRightPressed = false;
         this.keyFirePressed = false;
+        this.keyMissilePressed = false;
 
         this.ctx = null;
         this.canvas = null;
 
         this.health = settings.health;
         this.bullets = [];
+        this.missiles = [];
+        this.missileInventory = 0;
         this.smokeClouds = [];
 
         this.fallingOutOfSky = false;
         this.crashed = false;
 
         this.canFire = true;
+        this.canFireMissile = true;
+        this.enemies = [];
 
         window.addEventListener('keydown', this.keyDown.bind(this));
         window.addEventListener('keyup', this.keyUp.bind(this));
@@ -164,6 +180,86 @@ export default class Plane {
                 this.bullets.push(new Bullet(this.canvas, this.x, this.y, this.directionDegrees));
             }
         }
+    }
+
+    /**
+     * Fire a missile (consumes one from inventory)
+     */
+    public fireMissile() {
+
+        if (!this.canFireMissile) return;
+        if (this.missileInventory <= 0) return;
+        if (!this.canvas) return;
+
+        this.canFireMissile = false;
+        this.missileInventory -= 1;
+
+        setTimeout(() => {
+            this.canFireMissile = true;
+        }, 600);
+
+        // Synthesized missile launch sound (whoosh + ignition rumble)
+        try {
+            this.missileSound.play();
+        } catch (e) {
+            // ignore audio errors
+        }
+
+        const target = this.pickClosestEnemy();
+        this.missiles.push(new Missile(this.canvas, this.x, this.y, this.directionDegrees, target));
+    }
+
+    /**
+     * Register the planes considered enemies of this plane (used as homing
+     * targets). Sky calls this after every plane is added.
+     *
+     * @param enemies
+     */
+    public setEnemies(enemies: Array<Plane>) {
+        this.enemies = enemies;
+    }
+
+    /**
+     * Pick the closest live enemy plane to use as a missile target.
+     * Returns null if there are no live enemies.
+     */
+    protected pickClosestEnemy(): Plane | null {
+        let closest: Plane | null = null;
+        let closestDistance = Infinity;
+
+        this.enemies.forEach((enemy) => {
+            if (enemy.hasCrashed()) return;
+            const dx = enemy.getX() - this.x;
+            const dy = enemy.getY() - this.y;
+            const d = Math.sqrt(dx * dx + dy * dy);
+            if (d < closestDistance) {
+                closestDistance = d;
+                closest = enemy;
+            }
+        });
+
+        return closest;
+    }
+
+    /**
+     * Add a missile to this plane's inventory
+     */
+    public collectMissile() {
+        this.missileInventory += 1;
+    }
+
+    /**
+     * Get current missile inventory count
+     */
+    public getMissileCount() {
+        return this.missileInventory;
+    }
+
+    /**
+     * Get missiles fired by the plane
+     */
+    public getMissiles() {
+        return this.missiles;
     }
 
     /**
@@ -301,6 +397,10 @@ export default class Plane {
             bullet.render();
         });
 
+        this.missiles.forEach((missile) => {
+            missile.render();
+        });
+
         // Remove smoke clouds that have faded
         this.smokeClouds = this.smokeClouds.filter((smokeCloud) => {
             return smokeCloud.isVisible();
@@ -309,6 +409,11 @@ export default class Plane {
         // Remove bullets no longer flying
         this.bullets = this.bullets.filter(bullet => {
             return bullet.isFlying();
+        });
+
+        // Remove missiles no longer flying
+        this.missiles = this.missiles.filter(missile => {
+            return missile.isFlying();
         });
 
         if (this.fallingOutOfSky) {
@@ -481,7 +586,9 @@ export default class Plane {
     }
 
     /**
-     * Mark keys pressed
+     * Mark keys pressed. The missile key matches against either
+     * KeyboardEvent.key or KeyboardEvent.code so callers can pass
+     * "ShiftLeft"/"ShiftRight" to distinguish the two physical Shift keys.
      *
      * @param event
      * @param pressed
@@ -490,6 +597,17 @@ export default class Plane {
         if (event.key === this.keyLeft) this.keyLeftPressed = pressed;
         if (event.key === this.keyRight) this.keyRightPressed = pressed;
         if (event.key === this.keyFire) this.keyFirePressed = pressed;
+
+        const missileKeyMatches = event.code === this.keyMissile || event.key === this.keyMissile;
+        if (missileKeyMatches) {
+            // Fire on the press edge only (so the OS auto-repeat while
+            // held doesn't spam missiles). Internal canFireMissile cooldown
+            // still throttles rapid mashing.
+            if (pressed && !this.keyMissilePressed) {
+                this.fireMissile();
+            }
+            this.keyMissilePressed = pressed;
+        }
     }
 
     /**
