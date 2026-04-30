@@ -13,6 +13,10 @@
                         <div v-if="planeOneMissiles!==null" class="missileCount">
                             <v-icon small color="red darken-2">mdi-rocket-launch</v-icon>
                             <span class="ml-1">Missiles: {{ planeOneMissiles }}</span>
+                            <span class="ml-3">
+                                <v-icon small color="amber darken-2">mdi-trophy</v-icon>
+                                Wins: {{ playerOneWins }} / {{ WINS_TO_END_MATCH }}
+                            </span>
                         </div>
                     </v-col>
                     <v-col cols="2"></v-col>
@@ -23,6 +27,10 @@
                         <div v-if="planeTwoMissiles!==null" class="missileCount">
                             <v-icon small color="red darken-2">mdi-rocket-launch</v-icon>
                             <span class="ml-1">Missiles: {{ planeTwoMissiles }}</span>
+                            <span class="ml-3">
+                                <v-icon small color="amber darken-2">mdi-trophy</v-icon>
+                                Wins: {{ playerTwoWins }} / {{ WINS_TO_END_MATCH }}
+                            </span>
                         </div>
                     </v-col>
                     <v-col cols="1"></v-col>
@@ -146,14 +154,34 @@
             </v-card>
         </v-dialog>
 
-        <!-- GAME OVER DIALOG -->
+        <!-- ROUND OVER DIALOG -->
         <v-dialog v-model="gameOverDialogModel" width="600">
 
             <v-card>
                 <v-card-text class="pt-6 display-4 text-center">
                     {{winningPlayerName}} WINS!
-                    <div class="caption">Get ready dual continues....</div>
+                    <div class="title mt-2">
+                        Score: {{ playerOne }} {{ playerOneWins }} &mdash; {{ playerTwoWins }} {{ playerTwo }}
+                    </div>
+                    <div class="caption">Get ready, duel continues....</div>
                 </v-card-text>
+            </v-card>
+        </v-dialog>
+
+        <!-- MATCH OVER DIALOG (first to 3 wins) -->
+        <v-dialog v-model="matchOverDialogModel" persistent width="600">
+
+            <v-card>
+                <v-card-text class="pt-6 display-4 text-center">
+                    {{ matchWinnerName }} WINS THE MATCH!
+                    <div class="title mt-2">
+                        Final score: {{ playerOne }} {{ playerOneWins }} &mdash; {{ playerTwoWins }} {{ playerTwo }}
+                    </div>
+                    <div class="caption mt-2">First to {{ WINS_TO_END_MATCH }} wins the dogfight.</div>
+                </v-card-text>
+                <v-card-actions class="justify-center pb-4">
+                    <v-btn color="primary" @click="playAgain">Play Again</v-btn>
+                </v-card-actions>
             </v-card>
         </v-dialog>
 
@@ -219,11 +247,16 @@
                 clouds: [],
                 welcomeDialogModel: true,
                 gameOverDialogModel: false,
+                matchOverDialogModel: false,
                 tipsDialogModel: false,
                 gameNameModel: null,
                 tabModel: null,
                 playerOne: 'Player One',
                 playerTwo: 'Player Two',
+                playerOneWins: 0,
+                playerTwoWins: 0,
+                // First player to this many round wins ends the match.
+                WINS_TO_END_MATCH: 3,
 
                 messages: [],
                 rules: {
@@ -274,6 +307,12 @@
                 }
 
                 return null;
+            },
+            // Whoever has hit WINS_TO_END_MATCH first; null mid-match.
+            matchWinnerName() {
+                if (this.playerOneWins >= this.WINS_TO_END_MATCH) return this.playerOne;
+                if (this.playerTwoWins >= this.WINS_TO_END_MATCH) return this.playerTwo;
+                return null;
             }
         },
 
@@ -281,8 +320,21 @@
 
             startGameClicked() {
                 if (this.playerOne.length >= 1 && this.playerTwo.length >= 1) {
+                    // Fresh match from the welcome dialog — reset the score.
+                    this.resetMatch();
                     this.createGame();
                 }
+            },
+
+            resetMatch() {
+                this.playerOneWins = 0;
+                this.playerTwoWins = 0;
+                this.matchOverDialogModel = false;
+            },
+
+            playAgain() {
+                this.resetMatch();
+                this.createGame();
             },
 
            createNetworkGame() {
@@ -305,7 +357,9 @@
                 this.gameOverDialogModel = false;
 
                 this.sky = new Sky(this.$refs.sky, this.socket);
-                this.sky.gameOverHandler = this.gameOver;
+                // Wrap in an arrow function so `this` inside gameOver() stays
+                // the Vue component, not the Sky instance.
+                this.sky.gameOverHandler = () => this.gameOver();
 
                 this.planeOne = new Plane('spitfire', {
                     speed: 7,
@@ -350,6 +404,23 @@
             },
 
             gameOver() {
+                // Increment the score for whoever's still flying.
+                if (this.planeOne && this.planeOne.health <= 0) {
+                    this.playerTwoWins += 1;
+                } else if (this.planeTwo && this.planeTwo.health <= 0) {
+                    this.playerOneWins += 1;
+                }
+
+                // Match over once either player reaches WINS_TO_END_MATCH.
+                if (
+                    this.playerOneWins >= this.WINS_TO_END_MATCH
+                    || this.playerTwoWins >= this.WINS_TO_END_MATCH
+                ) {
+                    this.matchOverDialogModel = true;
+                    return; // Stop the auto-restart loop; user clicks Play Again.
+                }
+
+                // Otherwise show the per-round dialog and queue the next round.
                 this.gameOverDialogModel = true;
                 setTimeout(() => {
                     this.gameOverDialogModel = false;

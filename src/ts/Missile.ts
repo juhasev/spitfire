@@ -7,11 +7,11 @@ export default class Missile {
     static MISSILE_DAMAGE_RADIUS = 50;
 
     /**
-     * Max degrees the missile can turn per frame. The plane turns 2 deg/frame
-     * via incrementDirection(2)/decrementDirection(2), so the missile turns
-     * at half of that.
+     * Max degrees the missile can turn per frame. Originally set to 1.0
+     * (half of the plane's 2 deg/frame turn rate); bumped 25% to 1.25 so
+     * missiles track tighter turns more aggressively.
      */
-    static TURN_RATE_DEGREES = 1;
+    static TURN_RATE_DEGREES = 1.25;
 
     public x: number;
     public y: number;

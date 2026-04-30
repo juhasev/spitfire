@@ -137,7 +137,9 @@ export default class Sky {
     }
 
     /**
-     * Spawn a new missile pickup if it's time
+     * Spawn a new missile pickup if it's time. Pickups spawn inside the
+     * central 50% of the screen (25% margin on each axis) so they stay
+     * clear of the cloud bands that hug the four edges of the canvas.
      */
     protected maybeSpawnMissilePickup() {
         if (Date.now() < this.nextPickupAt) return;
@@ -148,9 +150,10 @@ export default class Sky {
             return;
         }
 
-        const margin = 60;
-        const x = margin + Math.random() * (this.canvas.width - margin * 2);
-        const y = margin + Math.random() * (this.canvas.height - margin * 2);
+        const marginX = this.canvas.width * 0.25;
+        const marginY = this.canvas.height * 0.25;
+        const x = marginX + Math.random() * (this.canvas.width - marginX * 2);
+        const y = marginY + Math.random() * (this.canvas.height - marginY * 2);
         this.missilePickups.push(new MissilePickup(this.canvas, x, y));
         this.nextPickupAt = Date.now() + this.randomPickupDelay();
     }
