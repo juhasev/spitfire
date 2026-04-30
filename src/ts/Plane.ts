@@ -249,6 +249,17 @@ export default class Plane {
     }
 
     /**
+     * Restore the given amount of health, capped at 100. Plays the hit
+     * audio quietly as a soft "received" cue.
+     *
+     * @param amount HP to restore (e.g. 40 for a standard medkit)
+     */
+    public collectHealthKit(amount: number) {
+        if (this.fallingOutOfSky || this.crashed) return;
+        this.health = Math.min(100, this.health + amount);
+    }
+
+    /**
      * Get current missile inventory count
      */
     public getMissileCount() {

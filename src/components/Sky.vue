@@ -207,6 +207,7 @@
                         <li>Tap <strong>Right Shift</strong> (Player 1) or <strong>Left Shift</strong> (Player 2) to launch a missile instantly &mdash; one per shot, drains your missile inventory</li>
                         <li>Missiles deal up to 80 damage with a small splash radius &mdash; hard to dodge once locked in</li>
                         <li>Missiles are heat-seeking and home in on the opponent, but turn at only half the rate your plane does &mdash; tight turns can shake them off</li>
+                        <li>Red-cross health kits drop in when either pilot is below 50% HP &mdash; touch one to restore +40 HP (capped at 100)</li>
                     </ul>
                     <v-btn color="primary" small class="mt-4" @click="tipsDialogModel=false">GOT IT</v-btn>
                 </v-card-text>

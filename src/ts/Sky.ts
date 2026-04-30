@@ -3,6 +3,7 @@ import Plane from "@/ts/Plane";
 import Bullet from "@/ts/Bullet";
 import Missile from "@/ts/Missile";
 import MissilePickup from "@/ts/MissilePickup";
+import HealthKitPickup from "@/ts/HealthKitPickup";
 import Explosion from "@/ts/Explosion";
 import DistanceCalculator from "@/ts/DistanceCalculator";
 import PointToLineDistanceCalculator from "@/ts/PointToLineDistanceCalculator";
@@ -19,6 +20,13 @@ export default class Sky {
     static PICKUP_MIN_DELAY = 6000;
     static PICKUP_MAX_DELAY = 14000;
 
+    /**
+     * Health threshold below which health kits become eligible to spawn,
+     * and the cooldown between successive kit spawns.
+     */
+    static HEALTH_KIT_HEALTH_THRESHOLD = 50;
+    static HEALTH_KIT_COOLDOWN_MS = 8000;
+
     private readonly canvas: HTMLCanvasElement;
     private readonly ctx: CanvasRenderingContext2D | null;
     private clouds: Array<CloudInterface>;
@@ -28,6 +36,8 @@ export default class Sky {
     private socket: Socket;
     private missilePickups: Array<MissilePickup>;
     private nextPickupAt: number;
+    private healthKitPickups: Array<HealthKitPickup>;
+    private nextHealthKitAt: number;
     private explosions: Array<Explosion>;
 
     /**
@@ -52,6 +62,8 @@ export default class Sky {
         };
         this.missilePickups = [];
         this.nextPickupAt = Date.now() + this.randomPickupDelay();
+        this.healthKitPickups = [];
+        this.nextHealthKitAt = 0; // armed immediately; health gate decides
         this.explosions = [];
         this.designClouds();
 
@@ -85,9 +97,12 @@ export default class Sky {
 
         this.clearSky();
 
-        // Maybe spawn a missile pickup, then render existing ones (under planes/clouds)
+        // Maybe spawn pickups, then render existing ones (under planes/clouds).
+        // Health kits only spawn when at least one plane is below the threshold.
         this.maybeSpawnMissilePickup();
+        this.maybeSpawnHealthKit();
         this.renderMissilePickups();
+        this.renderHealthKits();
 
         this.planes.forEach((plane: Plane) => {
 
@@ -114,11 +129,20 @@ export default class Sky {
 
                 // Plane collects any pickup it touches
                 this.detectMissilePickupCollection(plane);
+                this.detectHealthKitCollection(plane);
             }
         });
 
         // Drop pickups that were collected or expired
         this.missilePickups = this.missilePickups.filter(p => p.isActive());
+
+        // Health kits: when a kit just left the field, arm a cooldown so the
+        // next one doesn't appear instantly the moment health is still low.
+        const kitsBefore = this.healthKitPickups.length;
+        this.healthKitPickups = this.healthKitPickups.filter(p => p.isActive());
+        if (kitsBefore > 0 && this.healthKitPickups.length === 0) {
+            this.nextHealthKitAt = Date.now() + Sky.HEALTH_KIT_COOLDOWN_MS;
+        }
 
         // Render explosions on top of planes/projectiles, then prune the dead ones
         this.explosions.forEach(e => e.render());
@@ -175,6 +199,52 @@ export default class Sky {
             if (distance < pickup.getRadius() + 25) {
                 pickup.collect();
                 plane.collectMissile();
+            }
+        });
+    }
+
+    /**
+     * Spawn a health kit if (a) no kit is currently on screen, (b) the
+     * spawn cooldown has elapsed, and (c) at least one alive plane has
+     * dropped below the health threshold. Kits spawn in the central 50%
+     * of the canvas, away from the cloud bands.
+     */
+    protected maybeSpawnHealthKit() {
+        if (this.healthKitPickups.length > 0) return;
+        if (Date.now() < this.nextHealthKitAt) return;
+
+        const anyHurt = this.planes.some(p =>
+            p.health > 0 && p.health < Sky.HEALTH_KIT_HEALTH_THRESHOLD
+        );
+        if (!anyHurt) return;
+
+        const marginX = this.canvas.width * 0.25;
+        const marginY = this.canvas.height * 0.25;
+        const x = marginX + Math.random() * (this.canvas.width - marginX * 2);
+        const y = marginY + Math.random() * (this.canvas.height - marginY * 2);
+        this.healthKitPickups.push(new HealthKitPickup(this.canvas, x, y));
+    }
+
+    /**
+     * Render all active health kits.
+     */
+    protected renderHealthKits() {
+        this.healthKitPickups.forEach(p => p.render());
+    }
+
+    /**
+     * Detect plane touching a health kit and award the heal.
+     */
+    protected detectHealthKitCollection(plane: Plane) {
+        this.healthKitPickups.forEach((pickup: HealthKitPickup) => {
+            if (!pickup.isActive()) return;
+            const distance = new DistanceCalculator(
+                plane.getX(), plane.getY(),
+                pickup.getX(), pickup.getY()
+            ).getDistance();
+            if (distance < pickup.getRadius() + 25) {
+                pickup.collect();
+                plane.collectHealthKit(HealthKitPickup.HEAL_AMOUNT);
             }
         });
     }
