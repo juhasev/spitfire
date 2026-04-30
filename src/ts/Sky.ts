@@ -4,6 +4,7 @@ import Bullet from "@/ts/Bullet";
 import Missile from "@/ts/Missile";
 import MissilePickup from "@/ts/MissilePickup";
 import HealthKitPickup from "@/ts/HealthKitPickup";
+import Pilot from "@/ts/Pilot";
 import Explosion from "@/ts/Explosion";
 import DistanceCalculator from "@/ts/DistanceCalculator";
 import PointToLineDistanceCalculator from "@/ts/PointToLineDistanceCalculator";
@@ -27,6 +28,18 @@ export default class Sky {
     static HEALTH_KIT_HEALTH_THRESHOLD = 50;
     static HEALTH_KIT_COOLDOWN_MS = 8000;
 
+    /**
+     * How long the cloud-fade transition takes when ejection begins.
+     */
+    static CLOUD_FADE_MS = 1000;
+
+    /**
+     * Safety net: gameOver fires after this many ms even if the pilot
+     * is somehow still on screen, so a stuck animation can never lock
+     * up the match.
+     */
+    static EJECTION_MAX_MS = 10000;
+
     private readonly canvas: HTMLCanvasElement;
     private readonly ctx: CanvasRenderingContext2D | null;
     private clouds: Array<CloudInterface>;
@@ -39,6 +52,7 @@ export default class Sky {
     private healthKitPickups: Array<HealthKitPickup>;
     private nextHealthKitAt: number;
     private explosions: Array<Explosion>;
+    private ejection: { pilot: Pilot; startedAt: number; sourcePlane: Plane } | null;
 
     /**
      * Sky constructor
@@ -65,6 +79,7 @@ export default class Sky {
         this.healthKitPickups = [];
         this.nextHealthKitAt = 0; // armed immediately; health gate decides
         this.explosions = [];
+        this.ejection = null;
         this.designClouds();
 
         console.log("SKY INITIALIZED");
@@ -104,9 +119,36 @@ export default class Sky {
         this.renderMissilePickups();
         this.renderHealthKits();
 
+        // First pass: detect a newly-falling plane and start the eject sequence.
+        if (this.ejection === null) {
+            for (const plane of this.planes) {
+                if (plane.isFallingOutOfSky()) {
+                    this.ejection = {
+                        pilot: new Pilot(this.canvas, plane.getX(), plane.getY()),
+                        startedAt: Date.now(),
+                        sourcePlane: plane,
+                    };
+                    break;
+                }
+            }
+        }
+
         this.planes.forEach((plane: Plane) => {
 
             if (plane.hasCrashed()) {
+                // Hold gameOver until the ejection animation finishes so the
+                // parachute can play out. Safety timer guarantees we never
+                // hang here forever.
+                if (this.ejection !== null && this.ejection.sourcePlane === plane) {
+                    const elapsed = Date.now() - this.ejection.startedAt;
+                    const pilotDone = this.ejection.pilot.isOffScreen()
+                        || elapsed >= Sky.EJECTION_MAX_MS;
+                    if (!pilotDone) {
+                        // Skip the gameOver trigger this frame; keep animating.
+                        return;
+                    }
+                }
+
                 plane.toggleSounds(false);
                 if (this.gameOverHandler) this.gameOverHandler();
                 this.gameOver = true;
@@ -132,6 +174,12 @@ export default class Sky {
                 this.detectHealthKitCollection(plane);
             }
         });
+
+        // Render the ejected pilot above the planes/projectiles so the
+        // canopy and stick figure are visible against the sky.
+        if (this.ejection !== null) {
+            this.ejection.pilot.render();
+        }
 
         // Drop pickups that were collected or expired
         this.missilePickups = this.missilePickups.filter(p => p.isActive());
@@ -339,10 +387,13 @@ export default class Sky {
     }
 
     /**
-     * Draw all the clouds
-     *
+     * Draw all the clouds. During an ejection sequence the entire layer
+     * fades to transparent over CLOUD_FADE_MS so the action behind it
+     * (the falling plane and the parachuting pilot) becomes clearly visible.
      */
     public drawClouds() {
+        const opacity = this.computeCloudOpacity();
+        if (opacity <= 0) return;
 
         let maxCloudSize: number = 0;
 
@@ -353,7 +404,8 @@ export default class Sky {
                 cloud.x,
                 cloud.y,
                 cloud.startAngle,
-                cloud.endAngle
+                cloud.endAngle,
+                opacity
             );
 
             if (cloud.size > maxCloudSize) maxCloudSize = cloud.size;
@@ -370,22 +422,30 @@ export default class Sky {
     }
 
     /**
-     * Draw single cloud
-     *
-     * @param size
-     * @param x
-     * @param y
-     * @param startAngle
-     * @param endAngle
+     * 1.0 normally, ramps from 1.0 to 0 over CLOUD_FADE_MS once ejection starts.
      */
+    protected computeCloudOpacity(): number {
+        if (this.ejection === null) return 1;
+        const elapsed = Date.now() - this.ejection.startedAt;
+        return Math.max(0, 1 - elapsed / Sky.CLOUD_FADE_MS);
+    }
 
-    protected drawCloud(size: number, x: number, y: number, startAngle: number, endAngle: number) {
+    /**
+     * Draw single cloud at the given opacity (0..1).
+     */
+    protected drawCloud(
+        size: number,
+        x: number,
+        y: number,
+        startAngle: number,
+        endAngle: number,
+        opacity: number = 1
+    ) {
         if (this.ctx) {
             this.ctx.setTransform(1, 0, 0, 1, 0, 0);
             this.ctx.beginPath();
             this.ctx.arc(x, y, size, startAngle, endAngle, true); // Outer circle
-            this.ctx.fillStyle = "white";
-            this.ctx.fill();
+            this.ctx.fillStyle = `rgba(255,255,255,${opacity})`;
             this.ctx.fill();
             this.ctx.closePath();
         }

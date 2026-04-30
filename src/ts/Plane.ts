@@ -27,6 +27,12 @@ export default class Plane {
     private fallingOutOfSky: boolean;
 
     private speed: number;
+    /**
+     * Original cruise speed at full health. settings.speed is derived
+     * from this and the current health band (see updateSpeedFromHealth)
+     * so damage degrades it and healing restores it.
+     */
+    private baseSpeed: number;
     private x: number;
     private y: number;
     private audio: HTMLAudioElement;
@@ -85,6 +91,7 @@ export default class Plane {
         this.image.src = specs!.image;
 
         this.speed = settings.speed;
+        this.baseSpeed = settings.speed;
 
         this.x = settings.x;
         this.y = settings.y;
@@ -102,10 +109,15 @@ export default class Plane {
         this.gunAudio.volume = 0.2;
         this.missileSound = new MissileSound(0.45);
 
-        this.keyLeft = settings.keyLeft;
-        this.keyRight = settings.keyRight;
-        this.keyFire = settings.keyFire;
-        this.keyMissile = settings.keyMissile;
+        // Stash the configured keys lowercased so handleKeys() can do a
+        // case-insensitive compare. Otherwise Caps Lock (or Shift) turning
+        // 'a' / 'd' / 'w' into 'A' / 'D' / 'W' breaks Player 2's controls.
+        // 'ArrowLeft', 'ShiftLeft', etc. survive lowercasing unchanged
+        // because we lowercase both sides of the comparison.
+        this.keyLeft = settings.keyLeft.toLowerCase();
+        this.keyRight = settings.keyRight.toLowerCase();
+        this.keyFire = settings.keyFire.toLowerCase();
+        this.keyMissile = settings.keyMissile.toLowerCase();
 
         this.keyLeftPressed = false;
         this.keyRightPressed = false;
@@ -257,6 +269,8 @@ export default class Plane {
     public collectHealthKit(amount: number) {
         if (this.fallingOutOfSky || this.crashed) return;
         this.health = Math.min(100, this.health + amount);
+        // Crossing back over 50% / 20% restores the corresponding speed band.
+        this.updateSpeedFromHealth();
     }
 
     /**
@@ -312,9 +326,17 @@ export default class Plane {
             this.crashAudio.play();
         }
 
-        // Slow down damaged planes
-        if (this.settings.speed >= this.percentOfSpeed(50) && this.health < 50) this.settings.speed -= this.percentOfSpeed(20);
-        if (this.settings.speed >= this.percentOfSpeed(20) && this.health < 20) this.settings.speed -= this.percentOfSpeed(20);
+        // Settings speed is now derived from health bands so damage and
+        // healing both move it.
+        this.updateSpeedFromHealth();
+    }
+
+    /**
+     * Whether this plane is in its "out of health, falling out of the sky"
+     * state. Sky uses this to trigger the pilot ejection sequence.
+     */
+    public isFallingOutOfSky() {
+        return this.fallingOutOfSky;
     }
 
     /**
@@ -329,6 +351,24 @@ export default class Plane {
      */
     public hasCrashed() {
         return this.crashed;
+    }
+
+    /**
+     * Recompute settings.speed from baseSpeed and the current health band.
+     *
+     *   health >= 50  -> 100% (full base speed)
+     *   20 <= h < 50  -> 80%  (sluggish, was the original "first damage tier")
+     *   health <  20  -> 64%  (very sluggish, original 20% reduction stacked)
+     *
+     * Called from both addDamage() and collectHealthKit() so a health kit
+     * pickup actually restores the plane's speed when crossing back over
+     * a threshold.
+     */
+    protected updateSpeedFromHealth() {
+        let factor = 1.0;
+        if (this.health < 50) factor = 0.8;
+        if (this.health < 20) factor = 0.64;
+        this.settings.speed = this.baseSpeed * factor;
     }
 
     /**
@@ -597,19 +637,24 @@ export default class Plane {
     }
 
     /**
-     * Mark keys pressed. The missile key matches against either
-     * KeyboardEvent.key or KeyboardEvent.code so callers can pass
-     * "ShiftLeft"/"ShiftRight" to distinguish the two physical Shift keys.
+     * Mark keys pressed. Comparison is case-insensitive so Caps Lock or a
+     * stray Shift modifier doesn't break the controls. The missile key
+     * matches against either KeyboardEvent.key or KeyboardEvent.code so
+     * callers can pass "ShiftLeft"/"ShiftRight" to distinguish the two
+     * physical Shift keys.
      *
      * @param event
      * @param pressed
      */
     protected handleKeys(event: KeyboardEvent, pressed: boolean) {
-        if (event.key === this.keyLeft) this.keyLeftPressed = pressed;
-        if (event.key === this.keyRight) this.keyRightPressed = pressed;
-        if (event.key === this.keyFire) this.keyFirePressed = pressed;
+        const eventKey = event.key.toLowerCase();
+        const eventCode = event.code.toLowerCase();
 
-        const missileKeyMatches = event.code === this.keyMissile || event.key === this.keyMissile;
+        if (eventKey === this.keyLeft) this.keyLeftPressed = pressed;
+        if (eventKey === this.keyRight) this.keyRightPressed = pressed;
+        if (eventKey === this.keyFire) this.keyFirePressed = pressed;
+
+        const missileKeyMatches = eventCode === this.keyMissile || eventKey === this.keyMissile;
         if (missileKeyMatches) {
             // Fire on the press edge only (so the OS auto-repeat while
             // held doesn't spam missiles). Internal canFireMissile cooldown
