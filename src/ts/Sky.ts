@@ -29,11 +29,6 @@ export default class Sky {
     static HEALTH_KIT_COOLDOWN_MS = 8000;
 
     /**
-     * How long the cloud-fade transition takes when ejection begins.
-     */
-    static CLOUD_FADE_MS = 1000;
-
-    /**
      * Safety net: gameOver fires after this many ms even if the pilot
      * is somehow still on screen, so a stuck animation can never lock
      * up the match.
@@ -387,14 +382,11 @@ export default class Sky {
     }
 
     /**
-     * Draw all the clouds. During an ejection sequence the entire layer
-     * fades to transparent over CLOUD_FADE_MS so the action behind it
-     * (the falling plane and the parachuting pilot) becomes clearly visible.
+     * Draw all the clouds. Clouds render every frame regardless of game
+     * state — including during ejection — so the dogfight's atmosphere
+     * stays consistent.
      */
     public drawClouds() {
-        const opacity = this.computeCloudOpacity();
-        if (opacity <= 0) return;
-
         let maxCloudSize: number = 0;
 
         this.clouds.forEach((cloud: CloudInterface) => {
@@ -404,8 +396,7 @@ export default class Sky {
                 cloud.x,
                 cloud.y,
                 cloud.startAngle,
-                cloud.endAngle,
-                opacity
+                cloud.endAngle
             );
 
             if (cloud.size > maxCloudSize) maxCloudSize = cloud.size;
@@ -422,30 +413,20 @@ export default class Sky {
     }
 
     /**
-     * 1.0 normally, ramps from 1.0 to 0 over CLOUD_FADE_MS once ejection starts.
-     */
-    protected computeCloudOpacity(): number {
-        if (this.ejection === null) return 1;
-        const elapsed = Date.now() - this.ejection.startedAt;
-        return Math.max(0, 1 - elapsed / Sky.CLOUD_FADE_MS);
-    }
-
-    /**
-     * Draw single cloud at the given opacity (0..1).
+     * Draw single cloud.
      */
     protected drawCloud(
         size: number,
         x: number,
         y: number,
         startAngle: number,
-        endAngle: number,
-        opacity: number = 1
+        endAngle: number
     ) {
         if (this.ctx) {
             this.ctx.setTransform(1, 0, 0, 1, 0, 0);
             this.ctx.beginPath();
             this.ctx.arc(x, y, size, startAngle, endAngle, true); // Outer circle
-            this.ctx.fillStyle = `rgba(255,255,255,${opacity})`;
+            this.ctx.fillStyle = "white";
             this.ctx.fill();
             this.ctx.closePath();
         }
