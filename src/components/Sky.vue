@@ -1,7 +1,5 @@
 <template>
     <div>
-        <keypress :key-code="32" event="keydown" @pressed="startGame"/>
-
         <div class="controlBar">
             <v-container fluid class="pa-0">
                 <v-row dense>
@@ -11,10 +9,10 @@
                                     :value="planeOneHealth"
                                     :name="playerOne"></health-bar>
                         <div v-if="planeOneMissiles!==null" class="missileCount">
-                            <v-icon small color="red darken-2">mdi-rocket-launch</v-icon>
+                            <v-icon color="red-darken-2" size="small">mdi-rocket-launch</v-icon>
                             <span class="ml-1">Missiles: {{ planeOneMissiles }}</span>
                             <span class="ml-3">
-                                <v-icon small color="amber darken-2">mdi-trophy</v-icon>
+                                <v-icon color="amber-darken-2" size="small">mdi-trophy</v-icon>
                                 Wins: {{ playerOneWins }} / {{ WINS_TO_END_MATCH }}
                             </span>
                         </div>
@@ -25,10 +23,10 @@
                                     :value="planeTwoHealth"
                                     :name="playerTwo"></health-bar>
                         <div v-if="planeTwoMissiles!==null" class="missileCount">
-                            <v-icon small color="red darken-2">mdi-rocket-launch</v-icon>
+                            <v-icon color="red-darken-2" size="small">mdi-rocket-launch</v-icon>
                             <span class="ml-1">Missiles: {{ planeTwoMissiles }}</span>
                             <span class="ml-3">
-                                <v-icon small color="amber darken-2">mdi-trophy</v-icon>
+                                <v-icon color="amber-darken-2" size="small">mdi-trophy</v-icon>
                                 Wins: {{ playerTwoWins }} / {{ WINS_TO_END_MATCH }}
                             </span>
                         </div>
@@ -41,143 +39,104 @@
         <!-- MOBILE DEVICES -->
         <v-dialog fullscreen persistent v-if="isMobileDevice" v-model="welcomeDialogModel">
             <v-img src="logo.png"></v-img>
-            <v-card-text class="pt-6 display-4 text-center" v-if="isMobileDevice">
-                <v-alert class="subtitle-1" prominent type="error">Sorry no mobile support! Please play on your PC or Mac</v-alert>
+            <v-card-text v-if="isMobileDevice" class="pt-6 text-h1 text-center">
+                <v-alert class="text-subtitle-1" prominent type="error">Sorry no mobile support! Please play on your PC or Mac</v-alert>
             </v-card-text>
         </v-dialog>
 
         <!-- DESKTOP WELCOME DIALOG -->
-        <v-dialog persistent v-if="!isMobileDevice" v-model="welcomeDialogModel" width="700">
+        <v-dialog v-if="!isMobileDevice" v-model="welcomeDialogModel" persistent width="820">
 
             <v-card>
                 <v-img src="logo.png"></v-img>
 
-                <v-tabs v-model="tabModel">
-                    <v-tab key="local">
-                        Local duel
-                    </v-tab>
-                    <v-tab key="network" v-if="false">
-                        Network duel
-                    </v-tab>
+                <v-card-text v-if="!isMobileDevice" class="text-center">
 
-                </v-tabs>
+                    <v-container class="pa-0">
+                        <v-row dense>
 
-                <!-- LOCAL TAB -->
-                <v-tabs-items v-model="tabModel">
+                            <v-col cols="6">
+                                <v-switch v-model="sounds" class="mt-0" color="primary"
+                                          label="Enable sounds"
+                                          @update:model-value="soundsToggled"></v-switch>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-btn color="primary" size="small" @click="helpClicked">
+                                    <v-icon start>mdi-information-outline</v-icon>
+                                    TIPS
+                                </v-btn>
+                                <v-btn class="ml-2" size="small" @click="githubClicked">
+                                    <v-icon start>mdi-github</v-icon>
+                                    GITHUB
+                                </v-btn>
+                            </v-col>
 
-                    <!-- LOCAL GAME TAB -->
-                    <v-tab-item key="local">
-
-                        <v-card-text class="text-center" v-if="!isMobileDevice">
-
-                            <v-container class="pa-0">
-                                <v-row dense>
-
-                                    <v-col cols="6">
-                                        <v-switch v-model="sounds" class="mt-0" @change="soundsToggled"
-                                                  label="Enable sounds"></v-switch>
-                                    </v-col>
-                                    <v-col cols="6">
-                                        <v-btn color="primary" small @click="helpClicked">
-                                            <v-icon left>mdi-information-outline</v-icon>
-                                            TIPS
-                                        </v-btn>
-                                        <v-btn small class="ml-2" @click="githubClicked">
-                                            <v-icon left>mdi-github</v-icon>
-                                            GITHUB
-                                        </v-btn>
-                                    </v-col>
-
-                                    <v-col cols="6">
-                                        <v-text-field
-                                                :rules=[rules.required]
-                                                autofocus
-                                                hint="Player one name"
-                                                persistent-hint
-                                                dense
-                                                v-model="playerOne"
-                                        ></v-text-field>
-                                    </v-col>
-                                    <v-col class="pt-3">
-                                        <code class="mr-2">&#x2190; Left</code>
-                                        <code class="mr-2">&#x2192; Right</code>
-                                        <code class="mr-2">&#x2191; Shoot</code>
-                                        <code class="mr-2">Right Shift Missile</code>
-                                    </v-col>
-
-                                    <v-col cols="6">
-                                        <v-text-field
-                                                v-model="playerTwo"
-                                                persistent-hint hint="Player two name"
-                                                :rules=[rules.required]
-                                                dense
-                                                @keydown.enter="startGame"
-                                        ></v-text-field>
-                                    </v-col>
-
-                                    <v-col class="pt-3">
-                                        <code class="mr-2">A Left</code>
-                                        <code class="mr-2">D Right</code>
-                                        <code class="mr-2">W Shoot</code>
-                                        <code class="mr-2">Left Shift Missile</code>
-                                    </v-col>
-
-                                </v-row>
-                            </v-container>
-
-                            <v-btn color="primary" class="body-1" @click="startGameClicked">START GAME</v-btn>
-
-                        </v-card-text>
-                    </v-tab-item>
-
-                    <!-- NETWORK TAB -->
-                    <v-tab-item key="network">
-                        <v-card>
-                            <v-card-text>
+                            <v-col cols="6">
                                 <v-text-field
-                                        v-model="gameNameModel"
-                                        persistent-hint hint="Please enter name of the game"
-                                        :rules=[rules.required]
-                                        dense
-                                        @keydown.enter="createNetworkGame"
+                                    v-model="playerOne"
+                                    :rules="[rules.required]"
+                                    autofocus
+                                    density="compact"
+                                    hint="Player one name"
+                                    persistent-hint
                                 ></v-text-field>
+                            </v-col>
+                            <v-col class="pt-3 keys-row">
+                                <code class="mr-2">&#x2190; Left</code>
+                                <code class="mr-2">&#x2192; Right</code>
+                                <code class="mr-2">&#x2191; Shoot</code>
+                                <code>Right Shift Missile</code>
+                            </v-col>
 
-                            </v-card-text>
-                            <v-card-actions>
-                                <v-btn color="primary" @click="createNetworkGame">Create new network game</v-btn>
-                            </v-card-actions>
-                        </v-card>
-                    </v-tab-item>
+                            <v-col cols="6">
+                                <v-text-field
+                                    v-model="playerTwo"
+                                    :rules="[rules.required]" density="compact"
+                                    hint="Player two name"
+                                    persistent-hint
+                                    @keydown.enter="startGame"
+                                ></v-text-field>
+                            </v-col>
 
-                </v-tabs-items>
+                            <v-col class="pt-3 keys-row">
+                                <code class="mr-2">A Left</code>
+                                <code class="mr-2">D Right</code>
+                                <code class="mr-2">W Shoot</code>
+                                <code>Left Shift Missile</code>
+                            </v-col>
+
+                        </v-row>
+                    </v-container>
+
+                    <v-btn class="text-body-1" color="primary" @click="startGameClicked">START GAME</v-btn>
+
+                </v-card-text>
 
             </v-card>
         </v-dialog>
 
         <!-- ROUND OVER DIALOG -->
         <v-dialog v-model="gameOverDialogModel" width="600">
-
             <v-card>
-                <v-card-text class="pt-6 display-4 text-center">
-                    {{winningPlayerName}} WINS!
-                    <div class="title mt-2">
+                <v-card-text class="pt-6 text-h1 text-center">
+                    {{ winningPlayerName }} WINS!
+                    <div class="text-h6 mt-2">
                         Score: {{ playerOne }} {{ playerOneWins }} &mdash; {{ playerTwoWins }} {{ playerTwo }}
                     </div>
-                    <div class="caption">Get ready, duel continues....</div>
+                    <div class="text-caption">Get ready, duel continues....</div>
                 </v-card-text>
             </v-card>
         </v-dialog>
 
         <!-- MATCH OVER DIALOG (first to 3 wins) -->
         <v-dialog v-model="matchOverDialogModel" persistent width="600">
-
             <v-card>
-                <v-card-text class="pt-6 display-4 text-center">
+                <v-card-text class="pt-6 text-h1 text-center">
                     {{ matchWinnerName }} WINS THE MATCH!
-                    <div class="title mt-2">
+                    <div class="text-h6 mt-2">
                         Final score: {{ playerOne }} {{ playerOneWins }} &mdash; {{ playerTwoWins }} {{ playerTwo }}
                     </div>
-                    <div class="caption mt-2">First to {{ WINS_TO_END_MATCH }} wins the dogfight.</div>
+                    <div class="text-caption mt-2">First to {{ WINS_TO_END_MATCH }} wins the dogfight.</div>
                 </v-card-text>
                 <v-card-actions class="justify-center pb-4">
                     <v-btn color="primary" @click="playAgain">Play Again</v-btn>
@@ -186,7 +145,6 @@
         </v-dialog>
 
         <v-dialog v-model="tipsDialogModel" width="600">
-
             <v-card>
                 <v-alert type="info">Tips and tricks for winners</v-alert>
                 <v-card-text class="text-left">
@@ -209,7 +167,7 @@
                         <li>Missiles are heat-seeking and home in on the opponent, but turn at only half the rate your plane does &mdash; tight turns can shake them off</li>
                         <li>Red-cross health kits drop in when either pilot is below 50% HP &mdash; touch one to restore +40 HP (capped at 100)</li>
                     </ul>
-                    <v-btn color="primary" small class="mt-4" @click="tipsDialogModel=false">GOT IT</v-btn>
+                    <v-btn class="mt-4" color="primary" size="small" @click="tipsDialogModel=false">GOT IT</v-btn>
                 </v-card-text>
             </v-card>
         </v-dialog>
@@ -220,12 +178,11 @@
 </template>
 
 <script>
-
     import Sky from "../ts/Sky.ts";
     import Plane from "../ts/Plane.ts";
-    import HealthBar from "@/components/HealthBar";
-    import {isMobile} from 'mobile-device-detect';
-    import io from 'socket.io-client';
+    import HealthBar from "@/components/HealthBar.vue";
+    import { isMobile } from 'mobile-device-detect';
+    import { io } from 'socket.io-client';
 
     export default {
         name: "Spitfire",
@@ -236,7 +193,6 @@
 
         components: {
             HealthBar,
-            Keypress: () => import("vue-keypress")
         },
 
         data() {
@@ -251,7 +207,7 @@
                 matchOverDialogModel: false,
                 tipsDialogModel: false,
                 gameNameModel: null,
-                tabModel: null,
+                tabModel: 'local',
                 playerOne: 'Player One',
                 playerTwo: 'Player Two',
                 playerOneWins: 0,
@@ -263,12 +219,12 @@
                 rules: {
                     required: value => !!value || 'Name is required.',
                 },
-                socket: io('localhost:3001')
+                socket: io('localhost:3001'),
+                _spaceListener: null,
             };
         },
 
         mounted() {
-
             this.socket.on('MESSAGE', (data) => {
                 this.messages.push(data);
             });
@@ -277,6 +233,21 @@
                 user: 'Juha',
                 message: 'Some message here'
             });
+
+            // Replace previous <keypress> component with a native listener.
+            this._spaceListener = (e) => {
+                if (e.code === 'Space' || e.keyCode === 32) {
+                    this.startGame();
+                }
+            };
+            window.addEventListener('keydown', this._spaceListener);
+        },
+
+        beforeUnmount() {
+            if (this._spaceListener) {
+                window.removeEventListener('keydown', this._spaceListener);
+                this._spaceListener = null;
+            }
         },
 
         computed: {
@@ -306,7 +277,6 @@
                 if (this.planeTwo && this.planeTwo.health <= 0) {
                     return this.playerOne;
                 }
-
                 return null;
             },
             // Whoever has hit WINS_TO_END_MATCH first; null mid-match.
@@ -338,11 +308,11 @@
                 this.createGame();
             },
 
-           createNetworkGame() {
-               this.socket.emit('CREATE_GAME', {
-                   name: this.gameNameModel,
-               });
-           },
+            createNetworkGame() {
+                this.socket.emit('CREATE_GAME', {
+                    name: this.gameNameModel,
+                });
+            },
 
             helpClicked() {
                 this.tipsDialogModel = true;
@@ -401,7 +371,8 @@
             },
 
             soundsToggled() {
-                this.planeOne.toggleSounds(this.sounds);
+                if (this.planeOne) this.planeOne.toggleSounds(this.sounds);
+                if (this.planeTwo) this.planeTwo.toggleSounds(this.sounds);
             },
 
             gameOver() {
@@ -458,6 +429,15 @@
 
     .sky {
         background-color: #BBDEFB;
+    }
+
+    .keys-row {
+        white-space: nowrap;
+    }
+
+    .keys-row code {
+        font-size: 11px;
+        padding: 2px 4px;
     }
 
     html {
